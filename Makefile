@@ -1,3 +1,3 @@
 all:
-	gcc -o sandbox sandbox.c
+	gcc -o sandbox sandbox.c -Wall
 
