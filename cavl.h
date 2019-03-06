@@ -63,14 +63,94 @@ static inline void cavl_dump(
 #endif
 
 static inline int cavl_query(
-		void *root,
-		const void *query, /* guaranteed to be 2nd argument of cmp function */
-		void **l,
-		void **u,
-		cavl_qcmp_t cmp)
-{}
+		cavl_node_t *root,
+		const void *query,
+		cavl_node_t **lret,
+		cavl_node_t **uret,
+		cavl_qcmp_t cmpfn)
+{
+	int cmp;
+	int ret = 0;
+	cavl_node_t *n;
+	cavl_node_t *c;
 
-static void _cavl_ror(
+	/* perform lower search */
+	if(lret || !uret) {
+		c = CAVL_NULL;
+		for(n = root; n;) {
+			cmp = cmpfn(n, query);
+			if(cmp >= 0) {
+				if(!cmp)
+					ret = 1;
+				c = n;
+				n = n->l;
+			}
+			else
+				n = n->r;
+		}
+		if(lret)
+			*lret = c;
+	}
+	if(uret) {
+		c = CAVL_NULL;
+		for(n = root; n;) {
+			cmp = cmpfn(n, query);
+			if(cmp > 0) {
+				c = n;
+				n = n->l;
+			}
+			else {
+				if(!cmp)
+					ret = 1;
+				n = n->r;
+			}
+		}
+		*uret = c;
+	}
+	return ret;
+}
+
+static inline cavl_node_t *cavl_first(
+		cavl_node_t *n)
+{
+	if(n)
+		for(; n->l; n = n->l);
+	return n;
+}
+
+static inline cavl_node_t *cavl_last(
+		cavl_node_t *n)
+{
+	if(n)
+		for(; n->r; n = n->r);
+	return n;
+}
+
+static inline cavl_node_t *cavl_next(
+		cavl_node_t *n)
+{
+	if(n->r)
+		for(n = n->r; n->l; n = n->l);
+	else {
+		for(; n->p && n == n->p->r; n = n->p);
+		n = n->p;
+	}
+	return n;
+}
+
+static inline cavl_node_t *cavl_prev(
+		cavl_node_t *n)
+{
+	if(n->l)
+		for(n = n->l; n->r; n = n->r);
+	else {
+		for(; n->p && n == n->p->l; n = n->p);
+		n = n->p;
+	}
+	return n;
+}
+
+static inline void _cavl_ror(
 		cavl_node_t **root,
 		cavl_node_t *n)
 {
@@ -104,7 +184,7 @@ static void _cavl_ror(
 	p->p = n;
 }
 
-static void _cavl_rol(
+static inline void _cavl_rol(
 		cavl_node_t **root,
 		cavl_node_t *n)
 {
