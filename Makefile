@@ -1,3 +1,3 @@
 all:
-	gcc -o example example.c -Wall
+	gcc -o example example.c -Wall -Wpedantic -Wextra
 
