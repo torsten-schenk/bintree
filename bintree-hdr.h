@@ -16,10 +16,16 @@
 #define BINTREE_P(X) (BINTREE_TONODE(X)->p)
 #define BINTREE_B(X) (BINTREE_TONODE(X)->b)
 #define BINTREE_SIZE(X) (BINTREE_TONODE(X)->size)
+#define BINTREE_CL(X) (BINTREE_TOCNODE(X)->l)
+#define BINTREE_CR(X) (BINTREE_TOCNODE(X)->r)
+#define BINTREE_CP(X) (BINTREE_TOCNODE(X)->p)
+#define BINTREE_CB(X) (BINTREE_TOCNODE(X)->b)
+#define BINTREE_CSIZE(X) (BINTREE_TOCNODE(X)->size)
 #endif
 
 typedef struct BINTREE_ID(node) BINTREE_ID(node_t);
 typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
+typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
 
 struct BINTREE_ID(node) {
 #if defined(BINTREE_USE_PARENT)

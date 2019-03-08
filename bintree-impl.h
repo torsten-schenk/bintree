@@ -3,7 +3,7 @@ static inline int BINTREE_ID(query) (
 		const void *query,
 		BINTREE_DATA **lret,
 		BINTREE_DATA **uret,
-		BINTREE_ID(cmp_t) cmpfn)
+		BINTREE_ID(qcmp_t) cmpfn)
 {
 	int cmp;
 	int ret = 0;
@@ -279,7 +279,7 @@ static inline void BINTREE_ID(insert)(
 #endif
 }
 
-static inline void cavl_remove(
+static inline void BINTREE_ID(remove)(
 		BINTREE_DATA **root,
 		BINTREE_DATA *x)
 {
@@ -311,6 +311,9 @@ static inline void cavl_remove(
 		BINTREE_P(y) = BINTREE_P(x);
 		BINTREE_R(y) = BINTREE_R(x);
 		BINTREE_B(y) = BINTREE_B(x);
+#ifdef BINTREE_USE_INDEX
+		BINTREE_SIZE(y) = BINTREE_SIZE(x);
+#endif
 		if(BINTREE_R(y))
 			BINTREE_P(BINTREE_R(y)) = y;
 		if(BINTREE_P(y)) {
@@ -424,6 +427,35 @@ static inline void cavl_remove(
 #endif
 }
 
+#endif
+
+#ifdef BINTREE_USE_INDEX
+static inline size_t BINTREE_ID(size)(
+		const BINTREE_DATA *n)
+{
+	return BINTREE_SIZE(n);
+}
+
+static inline size_t BINTREE_ID(index)(
+		const BINTREE_DATA *n)
+{
+	const BINTREE_DATA *c;
+	size_t idx;
+	if(BINTREE_CL(n))
+		idx = BINTREE_CSIZE(BINTREE_CL(n));
+	else
+		idx = 0;
+	while(BINTREE_P(n)) {
+		c = n;
+		n = BINTREE_P(n);
+		if(BINTREE_CR(n) == c) {
+			idx++;
+			if(BINTREE_CL(n))
+				idx += BINTREE_CSIZE(BINTREE_CL(n));
+		}
+	}
+	return idx;
+}
 #endif
 
 #undef BINTREE_USE_AVL
