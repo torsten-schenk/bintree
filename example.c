@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdio.h>
 typedef struct mydata mydata_t;
 
@@ -16,6 +17,18 @@ struct mydata {
 #include "bintree-impl.h"
 
 static mydata_t *root = NULL;
+
+static int cmp_value2(
+		const mydata_t *a,
+		const mydata_t *b)
+{
+	if(a->value < b->value)
+		return -1;
+	else if(a->value > b->value)
+		return 1;
+	else
+		return 0;
+}
 
 static int cmp_value(
 		const mydata_t *a,
@@ -86,6 +99,22 @@ int main()
 		cur = mydata_at(root, i);
 		printf("CHECK GET: %zu %zu\n", i, mydata_index(cur));
 	}
+
+
+
+
+	printf("sort test\n");
+	root = NULL;
+	for(size_t i = 0; i < 32; i++)
+		mydata_insert(&root, root, data + i);
+
+	for(cur = mydata_first(root); cur; cur = mydata_next(cur)) 
+		printf("%d\n", cur->value);
+
+	mydata_sort(&root, cmp_value2);
+	printf("SORTED:\n");
+	for(cur = mydata_first(root); cur; cur = mydata_next(cur)) 
+		printf("%d\n", cur->value);
 	return 0;
 }
 

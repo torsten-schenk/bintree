@@ -27,6 +27,7 @@ static inline int BINTREE_ID(query) (
 		if(lret)
 			*lret = c;
 	}
+	/* perform upper search */
 	if(uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
@@ -208,7 +209,7 @@ static inline void BINTREE_ID(insert)(
 		BINTREE_DATA *n)
 {
 	BINTREE_DATA *cur;
-#ifdef BTREE_BZERO
+#ifdef BINTREE_BZERO
 	memset(BINTREE_TONODE(n), 0, sizeof(BINTREE_ID(node_t)));
 #endif
 	if(!p) { /* append at end */
@@ -435,6 +436,62 @@ static inline void BINTREE_ID(remove)(
 #endif
 }
 
+static inline void BINTREE_ID(sort)(
+		BINTREE_DATA **root,
+		BINTREE_ID(cmp_t) cmpfn)
+{
+	BINTREE_DATA *r;
+	BINTREE_DATA *p;
+	BINTREE_DATA *n;
+	BINTREE_DATA *d; /* destination node for insertion */
+	BINTREE_DATA *s = *root; /* source node */
+	int cmp;
+
+	*root = BINTREE_NULL;
+
+	/* we don't care about additional information like size and balancing factor to be correct here, we just need the structure of the tree to deconstruct it */
+	while(s) {
+		for(; BINTREE_L(s); s = BINTREE_L(s));
+		p = BINTREE_P(s);
+		r = BINTREE_R(s);
+
+		/* perform upper search */
+		d = BINTREE_NULL;
+		for(n = *root; n;) {
+			cmp = cmpfn(n, s);
+			if(cmp > 0) {
+				d = n;
+				n = BINTREE_L(n);
+			}
+			else
+				n = BINTREE_R(n);
+		}
+
+#ifndef BINTREE_BZERO
+		/* otherwise, if BINTREE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
+		memset(BINTREE_TONODE(s), 0, sizeof(BINTREE_ID(node_t)));
+#endif
+		BINTREE_ID(insert)(root, d, s);
+
+		/* are we still within the tree or at the root node? */
+		if(p) {
+			/* put n->r to n's position */
+			BINTREE_L(p) = r;
+			if(r) {
+				BINTREE_P(r) = p;
+				s = r;
+			}
+			else
+				s = p;
+		}
+		else {
+			/* root node reached, continue with right subtree */
+			if(r)
+				BINTREE_P(r) = BINTREE_NULL;
+			s = r;
+		}
+	}
+}
 #endif
 
 #ifdef BINTREE_USE_INDEX
