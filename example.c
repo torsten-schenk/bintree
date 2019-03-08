@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 typedef struct mydata mydata_t;
+typedef struct mymulti mymulti_t;
 
 #define BINTREE_PREFIX mydata
 #define BINTREE_DATA mydata_t
@@ -15,6 +16,32 @@ struct mydata {
 	int value;
 };
 #include "bintree-impl.h"
+#include "bintree-reset.h"
+
+
+#if 0
+#define BINTREE_DATA mymulti_t
+#define BINTREE_USE_PARENT
+#define BINTREE_USE_INDEX
+#define BINTREE_USE_AVL
+#define BINTREE_USE_BZERO
+
+#define BINTREE_PREFIX myascend
+#include "bintree-hdr.h"
+#define BINTREE_PREFIX mydescend
+#include "bintree-hdr.h"
+struct mymulti {
+	myascend_node_t ascend;
+	mydescend_node_t descend;
+	int value;
+};
+#define BINTREE_PREFIX myascend
+#define BINTREE_FIELD ascend
+#include "bintree-impl.h"
+#define BINTREE_PREFIX mydescend
+#define BINTREE_FIELD descend
+#include "bintree-impl.h"
+#endif
 
 static mydata_t *root = NULL;
 

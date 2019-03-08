@@ -758,12 +758,3 @@ static inline const BINTREE_DATA *BINTREE_ID(cat)(
 }
 #endif
 
-
-#undef BINTREE_USE_AVL
-#undef BINTREE_USE_PARENT
-#undef BINTREE_USE_INDEX
-#undef BINTREE_USE_BZERO
-#undef BINTREE_DATA
-#undef BINTREE_FIELD
-#undef BINTREE_PREFIX
-
