@@ -210,7 +210,7 @@ static inline void BINTREE_ID(insert)(
 {
 	BINTREE_DATA *cur;
 #ifdef BINTREE_BZERO
-	memset(BINTREE_TONODE(n), 0, sizeof(BINTREE_ID(node_t)));
+	bzero(BINTREE_TONODE(n), sizeof(BINTREE_ID(node_t)));
 #endif
 	if(!p) { /* append at end */
 		if(*root) {
@@ -469,7 +469,7 @@ static inline void BINTREE_ID(sort)(
 
 #ifndef BINTREE_BZERO
 		/* otherwise, if BINTREE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
-		memset(BINTREE_TONODE(s), 0, sizeof(BINTREE_ID(node_t)));
+		bzero(BINTREE_TONODE(s), sizeof(BINTREE_ID(node_t)));
 #endif
 		BINTREE_ID(insert)(root, d, s);
 
