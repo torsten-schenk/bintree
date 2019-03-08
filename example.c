@@ -18,23 +18,10 @@ struct mydata {
 
 static mydata_t *root = NULL;
 
-static int cmp_value2(
+static int cmp_value(
 		const mydata_t *a,
 		const mydata_t *b)
 {
-	if(a->value < b->value)
-		return -1;
-	else if(a->value > b->value)
-		return 1;
-	else
-		return 0;
-}
-
-static int cmp_value(
-		const mydata_t *a,
-		const void *b_)
-{
-	const mydata_t *b = b_;
 	if(a->value < b->value)
 		return -1;
 	else if(a->value > b->value)
@@ -60,7 +47,7 @@ static void insert(
 		mydata_t *data)
 {
 	mydata_t *l;
-	mydata_query(root, data, &l, NULL, cmp_value);
+	mydata_find(root, data, &l, NULL, cmp_value);
 	mydata_insert(&root, l, data);
 }
 
@@ -111,7 +98,7 @@ int main()
 	for(cur = mydata_first(root); cur; cur = mydata_next(cur)) 
 		printf("%d\n", cur->value);
 
-	mydata_sort(&root, cmp_value2);
+	mydata_sort(&root, cmp_value);
 	printf("SORTED:\n");
 	for(cur = mydata_first(root); cur; cur = mydata_next(cur)) 
 		printf("%d\n", cur->value);

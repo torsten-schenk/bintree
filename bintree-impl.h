@@ -1,3 +1,4 @@
+/* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
 static inline int BINTREE_ID(query) (
 		BINTREE_DATA *root,
 		const void *query,
@@ -32,6 +33,55 @@ static inline int BINTREE_ID(query) (
 		c = BINTREE_NULL;
 		for(n = root; n;) {
 			cmp = cmpfn(n, query);
+			if(cmp > 0) {
+				c = n;
+				n = BINTREE_L(n);
+			}
+			else {
+				if(!cmp)
+					ret = 1;
+				n = BINTREE_R(n);
+			}
+		}
+		*uret = c;
+	}
+	return ret;
+}
+
+static inline int BINTREE_ID(find) (
+		BINTREE_DATA *root,
+		const BINTREE_DATA *data,
+		BINTREE_DATA **lret,
+		BINTREE_DATA **uret,
+		BINTREE_ID(cmp_t) cmpfn)
+{
+	int cmp;
+	int ret = 0;
+	BINTREE_DATA *n;
+	BINTREE_DATA *c;
+
+	/* perform lower search */
+	if(lret || !uret) {
+		c = BINTREE_NULL;
+		for(n = root; n;) {
+			cmp = cmpfn(n, data);
+			if(cmp >= 0) {
+				if(!cmp)
+					ret = 1;
+				c = n;
+				n = BINTREE_L(n);
+			}
+			else
+				n = BINTREE_R(n);
+		}
+		if(lret)
+			*lret = c;
+	}
+	/* perform upper search */
+	if(uret) {
+		c = BINTREE_NULL;
+		for(n = root; n;) {
+			cmp = cmpfn(n, data);
 			if(cmp > 0) {
 				c = n;
 				n = BINTREE_L(n);
