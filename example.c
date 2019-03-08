@@ -59,6 +59,13 @@ static int query(
 	return mydata_query(root, &value, l, u, cmp_field);
 }
 
+static mydata_t *upper(
+		mydata_t *data)
+{
+	mydata_find(root, data, NULL, &data, cmp_value);
+	return data;
+}
+
 int main()
 {
 	mydata_t data[256];
