@@ -286,7 +286,9 @@ static inline void BINTREE_ID(remove)(
 	BINTREE_DATA *c;
 	BINTREE_DATA *y;
 	BINTREE_DATA *zp;
+#ifdef BINTREE_USE_AVL
 	int zr = 1; /* used as bool: did we come from right child, i.e. did the right child of zp decrease in height in previous operation? */
+#endif
 
 	if(BINTREE_L(x) && BINTREE_R(x)) {
 		y = BINTREE_L(x);
@@ -306,11 +308,15 @@ static inline void BINTREE_ID(remove)(
 		}
 		else {
 			zp = y;
+#ifdef BINTREE_USE_AVL
 			zr = 0;
+#endif
 		}
 		BINTREE_P(y) = BINTREE_P(x);
 		BINTREE_R(y) = BINTREE_R(x);
+#ifdef BINTREE_USE_AVL
 		BINTREE_B(y) = BINTREE_B(x);
+#endif
 #ifdef BINTREE_USE_INDEX
 		BINTREE_SIZE(y) = BINTREE_SIZE(x);
 #endif
@@ -327,8 +333,10 @@ static inline void BINTREE_ID(remove)(
 	}
 	else {
 		zp = BINTREE_P(x);
+#ifdef BINTREE_USE_AVL
 		if(zp && BINTREE_L(zp) == x)
 			zr = 0;
+#endif
 		if(!BINTREE_P(x)) { /* x was root node, set new root node */
 			if(BINTREE_L(x)) {
 				*root = BINTREE_L(x);

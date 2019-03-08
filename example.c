@@ -83,7 +83,7 @@ int main()
 	}
 
 	for(size_t i = 0; i < mydata_size(root); i++) {
-		cur = mydata_get(root, i);
+		cur = mydata_at(root, i);
 		printf("CHECK GET: %zu %zu\n", i, mydata_index(cur));
 	}
 	return 0;
