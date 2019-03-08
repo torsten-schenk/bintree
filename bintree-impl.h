@@ -231,6 +231,11 @@ static inline void BINTREE_ID(insert)(
 		BINTREE_P(n) = p;
 	}
 
+#ifdef BINTREE_USE_INDEX
+	for(p = n; p; p = BINTREE_P(p))
+		BINTREE_SIZE(p)++;
+#endif
+
 #ifdef BINTREE_USE_AVL
 	/* retracing after insertion */
 	for(p = BINTREE_P(n); p; n = p, p = BINTREE_P(n)) {
@@ -354,6 +359,11 @@ static inline void cavl_remove(
 				BINTREE_R(BINTREE_P(x)) = BINTREE_NULL;
 		}
 	}
+
+#ifdef BINTREE_USE_INDEX
+	for(c = zp; c; c = BINTREE_P(c))
+		BINTREE_SIZE(c)--;
+#endif
 
 #ifdef BINTREE_USE_AVL
 	/* retracing after remove */
