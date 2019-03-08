@@ -473,23 +473,15 @@ static inline void BINTREE_ID(sort)(
 #endif
 		BINTREE_ID(insert)(root, d, s);
 
-		/* are we still within the tree or at the root node? */
-		if(p) {
-			/* put n->r to n's position */
+		/* purpose here is to put r into s's position (as left child of p) and continue with p. */
+		if(r) {
+			BINTREE_P(r) = p;
+			s = r; /* we know that we will descend into r again in next loop iteration, so continue with r */
+		}
+		else
+			s = p;
+		if(p)
 			BINTREE_L(p) = r;
-			if(r) {
-				BINTREE_P(r) = p;
-				s = r;
-			}
-			else
-				s = p;
-		}
-		else {
-			/* root node reached, continue with right subtree */
-			if(r)
-				BINTREE_P(r) = BINTREE_NULL;
-			s = r;
-		}
 	}
 }
 #endif
