@@ -433,7 +433,7 @@ static inline void BINTREE_ID(remove)(
 static inline size_t BINTREE_ID(size)(
 		const BINTREE_DATA *n)
 {
-	return BINTREE_SIZE(n);
+	return BINTREE_CSIZE(n);
 }
 
 static inline size_t BINTREE_ID(index)(
@@ -445,9 +445,9 @@ static inline size_t BINTREE_ID(index)(
 		idx = BINTREE_CSIZE(BINTREE_CL(n));
 	else
 		idx = 0;
-	while(BINTREE_P(n)) {
+	while(BINTREE_CP(n)) {
 		c = n;
-		n = BINTREE_P(n);
+		n = BINTREE_CP(n);
 		if(BINTREE_CR(n) == c) {
 			idx++;
 			if(BINTREE_CL(n))
@@ -455,6 +455,30 @@ static inline size_t BINTREE_ID(index)(
 		}
 	}
 	return idx;
+}
+
+static inline BINTREE_DATA *BINTREE_ID(get)(
+		BINTREE_DATA *n,
+		size_t index)
+{
+	size_t lsz;
+
+	while(n) {
+		if(BINTREE_L(n))
+			lsz = BINTREE_SIZE(BINTREE_L(n));
+		else
+			lsz = 0;
+
+		if(lsz == index)
+			return n;
+		else if(index < lsz)
+			n = BINTREE_L(n);
+		else {
+			index -= lsz + 1;
+			n = BINTREE_R(n);
+		}
+	}
+	return BINTREE_NULL;
 }
 #endif
 
