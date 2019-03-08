@@ -457,7 +457,7 @@ static inline size_t BINTREE_ID(index)(
 	return idx;
 }
 
-static inline BINTREE_DATA *BINTREE_ID(get)(
+static inline BINTREE_DATA *BINTREE_ID(at)(
 		BINTREE_DATA *n,
 		size_t index)
 {
