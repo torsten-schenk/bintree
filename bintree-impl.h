@@ -259,7 +259,7 @@ static inline void BINTREE_ID(insert)(
 		BINTREE_DATA *n)
 {
 	BINTREE_DATA *cur;
-#ifdef BINTREE_BZERO
+#ifdef BINTREE_USE_BZERO
 	bzero(BINTREE_TONODE(n), sizeof(BINTREE_ID(node_t)));
 #endif
 	if(!p) { /* append at end */
@@ -517,8 +517,8 @@ static inline void BINTREE_ID(sort)(
 				n = BINTREE_R(n);
 		}
 
-#ifndef BINTREE_BZERO
-		/* otherwise, if BINTREE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
+#ifndef BINTREE_USE_BZERO
+		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
 		bzero(BINTREE_TONODE(s), sizeof(BINTREE_ID(node_t)));
 #endif
 		BINTREE_ID(insert)(root, d, s);
@@ -762,8 +762,8 @@ static inline const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_USE_AVL
 #undef BINTREE_USE_PARENT
 #undef BINTREE_USE_INDEX
+#undef BINTREE_USE_BZERO
 #undef BINTREE_DATA
 #undef BINTREE_FIELD
 #undef BINTREE_PREFIX
-#undef BINTREE_BZERO
 

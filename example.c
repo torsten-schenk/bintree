@@ -8,7 +8,7 @@ typedef struct mydata mydata_t;
 #define BINTREE_USE_PARENT
 #define BINTREE_USE_INDEX
 #define BINTREE_USE_AVL
-#define BINTREE_BZERO
+#define BINTREE_USE_BZERO
 #include "bintree-hdr.h"
 struct mydata {
 	mydata_node_t node;
