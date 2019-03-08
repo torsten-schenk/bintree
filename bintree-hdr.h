@@ -1,34 +1,39 @@
-#ifndef BINTREE_PREFIX
-#define BINTREE_PREFIX bintree
-#endif
-
-#ifndef _BINTREE_HDR
-#define _BINTREE_HDR
+#ifndef _BINTREE_INCLUDED
+#define _BINTREE_INCLUDED
 #define BINTREE_MAX(X, Y) ((X) > (Y) ? (X) : (Y))
+#define BINTREE_SCONCAT(A, B) A ## B
+#define BINTREE_SCONCAT2(A, B) BINTREE_SCONCAT(A, B)
 #define BINTREE_CONCAT(A, B) A ## _ ## B
 #define BINTREE_CONCAT2(A, B) BINTREE_CONCAT(A, B)
 #define BINTREE_ID(ID) BINTREE_CONCAT2(BINTREE_PREFIX, ID)
 #define BINTREE_NULL ((void*)0)
-#define BINTREE_TONODE(X) ((BINTREE_ID(node_t)*)&(X)->BINTREE_FIELD)
-#define BINTREE_TOCNODE(X) ((const BINTREE_ID(node_t)*)&(X)->BINTREE_FIELD)
-#define BINTREE_L(X) (BINTREE_TONODE(X)->l)
-#define BINTREE_R(X) (BINTREE_TONODE(X)->r)
-#define BINTREE_P(X) (BINTREE_TONODE(X)->p)
-#define BINTREE_B(X) (BINTREE_TONODE(X)->b)
-#define BINTREE_SIZE(X) (BINTREE_TONODE(X)->size)
-#define BINTREE_CL(X) (BINTREE_TOCNODE(X)->l)
-#define BINTREE_CR(X) (BINTREE_TOCNODE(X)->r)
-#define BINTREE_CP(X) (BINTREE_TOCNODE(X)->p)
-#define BINTREE_CB(X) (BINTREE_TOCNODE(X)->b)
-#define BINTREE_CSIZE(X) (BINTREE_TOCNODE(X)->size)
+#define BINTREE_TONODE(X) (&(X)->BINTREE_FIELD)
+#define BINTREE_L(X) (X->BINTREE_FIELD.l)
+#define BINTREE_R(X) (X->BINTREE_FIELD.r)
+#define BINTREE_P(X) (X->BINTREE_FIELD.p)
+#define BINTREE_B(X) (X->BINTREE_FIELD.b)
+#define BINTREE_SIZE(X) (X->BINTREE_FIELD.size)
 #endif
 
-typedef struct BINTREE_ID(node) BINTREE_ID(node_t);
-typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
-typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
+#ifndef BINTREE_CONFIG
+#error missing BINTREE_CONFIG before include statement
+#else
 
-struct BINTREE_ID(node) {
-#if defined(BINTREE_USE_PARENT)
+#define BINTREE_FIELD BINTREE_SCONCAT2(BINTREE_CONFIG, _FIELD)
+#define BINTREE_DATA BINTREE_SCONCAT2(BINTREE_CONFIG, _DATA)
+
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_PARENT) != 0
+#define BINTREE_USE_PARENT
+#endif
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_INDEX) != 0
+#define BINTREE_USE_INDEX
+#endif
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_AVL) != 0
+#define BINTREE_USE_AVL
+#endif
+
+struct {
+#ifdef BINTREE_USE_PARENT
 	BINTREE_DATA *p;
 #endif
 	BINTREE_DATA *l;
@@ -39,5 +44,14 @@ struct BINTREE_ID(node) {
 #ifdef BINTREE_USE_AVL
 	int b;
 #endif
-};
+} BINTREE_FIELD;
+
+#undef BINTREE_DATA
+#undef BINTREE_FIELD
+#undef BINTREE_USE_PARENT
+#undef BINTREE_USE_INDEX
+#undef BINTREE_USE_AVL
+#undef BINTREE_CONFIG
+
+#endif
 

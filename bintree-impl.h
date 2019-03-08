@@ -1,3 +1,27 @@
+#ifndef BINTREE_CONFIG
+#error missing BINTREE_CONFIG before include statement
+#else
+
+#define BINTREE_PREFIX BINTREE_SCONCAT2(BINTREE_CONFIG, _PREFIX)
+#define BINTREE_FIELD BINTREE_SCONCAT2(BINTREE_CONFIG, _FIELD)
+#define BINTREE_DATA BINTREE_SCONCAT2(BINTREE_CONFIG, _DATA)
+
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_PARENT) != 0
+#define BINTREE_USE_PARENT
+#endif
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_INDEX) != 0
+#define BINTREE_USE_INDEX
+#endif
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_AVL) != 0
+#define BINTREE_USE_AVL
+#endif
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_BZERO) != 0
+#define BINTREE_USE_BZERO
+#endif
+
+typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
+typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
+
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
 static inline int BINTREE_ID(query) (
 		BINTREE_DATA *root,
@@ -260,7 +284,7 @@ static inline void BINTREE_ID(insert)(
 {
 	BINTREE_DATA *cur;
 #ifdef BINTREE_USE_BZERO
-	bzero(BINTREE_TONODE(n), sizeof(BINTREE_ID(node_t)));
+	bzero(BINTREE_TONODE(n), sizeof(*BINTREE_TONODE(n)));
 #endif
 	if(!p) { /* append at end */
 		if(*root) {
@@ -540,7 +564,7 @@ static inline void BINTREE_ID(sort)(
 static inline size_t BINTREE_ID(size)(
 		const BINTREE_DATA *n)
 {
-	return BINTREE_CSIZE(n);
+	return BINTREE_SIZE(n);
 }
 
 static inline size_t BINTREE_ID(index)(
@@ -548,17 +572,17 @@ static inline size_t BINTREE_ID(index)(
 {
 	const BINTREE_DATA *c;
 	size_t idx;
-	if(BINTREE_CL(n))
-		idx = BINTREE_CSIZE(BINTREE_CL(n));
+	if(BINTREE_L(n))
+		idx = BINTREE_SIZE(BINTREE_L(n));
 	else
 		idx = 0;
-	while(BINTREE_CP(n)) {
+	while(BINTREE_P(n)) {
 		c = n;
-		n = BINTREE_CP(n);
-		if(BINTREE_CR(n) == c) {
+		n = BINTREE_P(n);
+		if(BINTREE_R(n) == c) {
 			idx++;
-			if(BINTREE_CL(n))
-				idx += BINTREE_CSIZE(BINTREE_CL(n));
+			if(BINTREE_L(n))
+				idx += BINTREE_SIZE(BINTREE_L(n));
 		}
 	}
 	return idx;
@@ -613,10 +637,10 @@ static inline int BINTREE_ID(cquery) (
 				if(!cmp)
 					ret = 1;
 				c = n;
-				n = BINTREE_CL(n);
+				n = BINTREE_L(n);
 			}
 			else
-				n = BINTREE_CR(n);
+				n = BINTREE_R(n);
 		}
 		if(lret)
 			*lret = c;
@@ -628,12 +652,12 @@ static inline int BINTREE_ID(cquery) (
 			cmp = cmpfn(n, query);
 			if(cmp > 0) {
 				c = n;
-				n = BINTREE_CL(n);
+				n = BINTREE_L(n);
 			}
 			else {
 				if(!cmp)
 					ret = 1;
-				n = BINTREE_CR(n);
+				n = BINTREE_R(n);
 			}
 		}
 		*uret = c;
@@ -662,10 +686,10 @@ static inline int BINTREE_ID(cfind) (
 				if(!cmp)
 					ret = 1;
 				c = n;
-				n = BINTREE_CL(n);
+				n = BINTREE_L(n);
 			}
 			else
-				n = BINTREE_CR(n);
+				n = BINTREE_R(n);
 		}
 		if(lret)
 			*lret = c;
@@ -677,12 +701,12 @@ static inline int BINTREE_ID(cfind) (
 			cmp = cmpfn(n, data);
 			if(cmp > 0) {
 				c = n;
-				n = BINTREE_CL(n);
+				n = BINTREE_L(n);
 			}
 			else {
 				if(!cmp)
 					ret = 1;
-				n = BINTREE_CR(n);
+				n = BINTREE_R(n);
 			}
 		}
 		*uret = c;
@@ -694,7 +718,7 @@ static inline const BINTREE_DATA *BINTREE_ID(cfirst)(
 		const BINTREE_DATA *n)
 {
 	if(n)
-		for(; BINTREE_CL(n); n = BINTREE_CL(n));
+		for(; BINTREE_L(n); n = BINTREE_L(n));
 	return n;
 }
 
@@ -702,7 +726,7 @@ static inline const BINTREE_DATA *BINTREE_ID(clast)(
 		const BINTREE_DATA *n)
 {
 	if(n)
-		for(; BINTREE_CR(n); n = BINTREE_CR(n));
+		for(; BINTREE_R(n); n = BINTREE_R(n));
 	return n;
 }
 
@@ -710,11 +734,11 @@ static inline const BINTREE_DATA *BINTREE_ID(clast)(
 static inline const BINTREE_DATA *BINTREE_ID(cnext)(
 		const BINTREE_DATA *n)
 {
-	if(BINTREE_CR(n))
-		for(n = BINTREE_CR(n); BINTREE_CL(n); n = BINTREE_CL(n));
+	if(BINTREE_R(n))
+		for(n = BINTREE_R(n); BINTREE_L(n); n = BINTREE_L(n));
 	else {
-		for(; BINTREE_CP(n) && n == BINTREE_CR(BINTREE_CP(n)); n = BINTREE_CP(n));
-		n = BINTREE_CP(n);
+		for(; BINTREE_P(n) && n == BINTREE_R(BINTREE_P(n)); n = BINTREE_P(n));
+		n = BINTREE_P(n);
 	}
 	return n;
 }
@@ -722,11 +746,11 @@ static inline const BINTREE_DATA *BINTREE_ID(cnext)(
 static inline const BINTREE_DATA *BINTREE_ID(cprev)(
 		const BINTREE_DATA *n)
 {
-	if(BINTREE_CL(n))
-		for(n = BINTREE_CL(n); BINTREE_CR(n); n = BINTREE_CR(n));
+	if(BINTREE_L(n))
+		for(n = BINTREE_L(n); BINTREE_R(n); n = BINTREE_R(n));
 	else {
-		for(; BINTREE_CP(n) && n == BINTREE_L(BINTREE_CP(n)); n = BINTREE_CP(n));
-		n = BINTREE_TOCNODE(n)->p;
+		for(; BINTREE_P(n) && n == BINTREE_L(BINTREE_P(n)); n = BINTREE_P(n));
+		n = BINTREE_TONODE(n)->p;
 	}
 	return n;
 }
@@ -740,21 +764,31 @@ static inline const BINTREE_DATA *BINTREE_ID(cat)(
 	size_t lsz;
 
 	while(n) {
-		if(BINTREE_CL(n))
-			lsz = BINTREE_SIZE(BINTREE_CL(n));
+		if(BINTREE_L(n))
+			lsz = BINTREE_SIZE(BINTREE_L(n));
 		else
 			lsz = 0;
 
 		if(lsz == index)
 			return n;
 		else if(index < lsz)
-			n = BINTREE_CL(n);
+			n = BINTREE_L(n);
 		else {
 			index -= lsz + 1;
-			n = BINTREE_CR(n);
+			n = BINTREE_R(n);
 		}
 	}
 	return BINTREE_NULL;
 }
+#endif
+
+#undef BINTREE_DATA
+#undef BINTREE_PREFIX
+#undef BINTREE_FIELD
+#undef BINTREE_USE_PARENT
+#undef BINTREE_USE_INDEX
+#undef BINTREE_USE_AVL
+#undef BINTREE_USE_BZERO
+#undef BINTREE_CONFIG
 #endif
 
