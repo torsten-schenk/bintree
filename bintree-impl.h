@@ -5,6 +5,7 @@
 #define BINTREE_PREFIX BINTREE_SCONCAT2(BINTREE_CONFIG, _PREFIX)
 #define BINTREE_FIELD BINTREE_SCONCAT2(BINTREE_CONFIG, _FIELD)
 #define BINTREE_DATA BINTREE_SCONCAT2(BINTREE_CONFIG, _DATA)
+#define BINTREE_FN BINTREE_SCONCAT2(BINTREE_CONFIG, _FN)
 
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_PARENT) != 0
 #define BINTREE_USE_PARENT
@@ -23,7 +24,7 @@ typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
 typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
 
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
-static inline int BINTREE_ID(query) (
+BINTREE_FN int BINTREE_ID(query) (
 		BINTREE_DATA *root,
 		const void *query,
 		BINTREE_DATA **lret,
@@ -72,7 +73,7 @@ static inline int BINTREE_ID(query) (
 	return ret;
 }
 
-static inline int BINTREE_ID(find) (
+BINTREE_FN int BINTREE_ID(find) (
 		BINTREE_DATA *root,
 		const BINTREE_DATA *data,
 		BINTREE_DATA **lret,
@@ -121,7 +122,7 @@ static inline int BINTREE_ID(find) (
 	return ret;
 }
 
-static inline BINTREE_DATA *BINTREE_ID(first)(
+BINTREE_FN BINTREE_DATA *BINTREE_ID(first)(
 		BINTREE_DATA *n)
 {
 	if(n)
@@ -129,7 +130,7 @@ static inline BINTREE_DATA *BINTREE_ID(first)(
 	return n;
 }
 
-static inline BINTREE_DATA *BINTREE_ID(last)(
+BINTREE_FN BINTREE_DATA *BINTREE_ID(last)(
 		BINTREE_DATA *n)
 {
 	if(n)
@@ -138,7 +139,7 @@ static inline BINTREE_DATA *BINTREE_ID(last)(
 }
 
 #ifdef BINTREE_USE_PARENT
-static inline BINTREE_DATA *BINTREE_ID(next)(
+BINTREE_FN BINTREE_DATA *BINTREE_ID(next)(
 		BINTREE_DATA *n)
 {
 	if(BINTREE_R(n))
@@ -150,7 +151,7 @@ static inline BINTREE_DATA *BINTREE_ID(next)(
 	return n;
 }
 
-static inline BINTREE_DATA *BINTREE_ID(prev)(
+BINTREE_FN BINTREE_DATA *BINTREE_ID(prev)(
 		BINTREE_DATA *n)
 {
 	if(BINTREE_L(n))
@@ -162,7 +163,7 @@ static inline BINTREE_DATA *BINTREE_ID(prev)(
 	return n;
 }
 
-static inline void BINTREE_ID(ror)(
+BINTREE_FN void BINTREE_ID(ror)(
 		BINTREE_DATA **root,
 		BINTREE_DATA *n)
 {
@@ -219,7 +220,7 @@ static inline void BINTREE_ID(ror)(
 	BINTREE_P(p) = n;
 }
 
-static inline void BINTREE_ID(rol)(
+BINTREE_FN void BINTREE_ID(rol)(
 		BINTREE_DATA **root,
 		BINTREE_DATA *n)
 {
@@ -277,7 +278,7 @@ static inline void BINTREE_ID(rol)(
 }
 
 /* insert 'n' node before 'p' */
-static inline void BINTREE_ID(insert)(
+BINTREE_FN void BINTREE_ID(insert)(
 		BINTREE_DATA **root,
 		BINTREE_DATA *p,
 		BINTREE_DATA *n)
@@ -354,7 +355,7 @@ static inline void BINTREE_ID(insert)(
 #endif
 }
 
-static inline void BINTREE_ID(remove)(
+BINTREE_FN void BINTREE_ID(remove)(
 		BINTREE_DATA **root,
 		BINTREE_DATA *x)
 {
@@ -510,7 +511,7 @@ static inline void BINTREE_ID(remove)(
 #endif
 }
 
-static inline void BINTREE_ID(sort)(
+BINTREE_FN void BINTREE_ID(sort)(
 		BINTREE_DATA **root,
 		BINTREE_ID(cmp_t) cmpfn)
 {
@@ -561,13 +562,13 @@ static inline void BINTREE_ID(sort)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-static inline size_t BINTREE_ID(size)(
+BINTREE_FN size_t BINTREE_ID(size)(
 		const BINTREE_DATA *n)
 {
 	return BINTREE_SIZE(n);
 }
 
-static inline size_t BINTREE_ID(index)(
+BINTREE_FN size_t BINTREE_ID(index)(
 		const BINTREE_DATA *n)
 {
 	const BINTREE_DATA *c;
@@ -588,7 +589,7 @@ static inline size_t BINTREE_ID(index)(
 	return idx;
 }
 
-static inline BINTREE_DATA *BINTREE_ID(at)(
+BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
 		BINTREE_DATA *n,
 		size_t index)
 {
@@ -616,7 +617,7 @@ static inline BINTREE_DATA *BINTREE_ID(at)(
 /* CONST IMPLEMENTATION */
 
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
-static inline int BINTREE_ID(cquery) (
+BINTREE_FN int BINTREE_ID(cquery) (
 		const BINTREE_DATA *root,
 		const void *query,
 		const BINTREE_DATA **lret,
@@ -665,7 +666,7 @@ static inline int BINTREE_ID(cquery) (
 	return ret;
 }
 
-static inline int BINTREE_ID(cfind) (
+BINTREE_FN int BINTREE_ID(cfind) (
 		const BINTREE_DATA *root,
 		const BINTREE_DATA *data,
 		const BINTREE_DATA **lret,
@@ -714,7 +715,7 @@ static inline int BINTREE_ID(cfind) (
 	return ret;
 }
 
-static inline const BINTREE_DATA *BINTREE_ID(cfirst)(
+BINTREE_FN const BINTREE_DATA *BINTREE_ID(cfirst)(
 		const BINTREE_DATA *n)
 {
 	if(n)
@@ -722,7 +723,7 @@ static inline const BINTREE_DATA *BINTREE_ID(cfirst)(
 	return n;
 }
 
-static inline const BINTREE_DATA *BINTREE_ID(clast)(
+BINTREE_FN const BINTREE_DATA *BINTREE_ID(clast)(
 		const BINTREE_DATA *n)
 {
 	if(n)
@@ -731,7 +732,7 @@ static inline const BINTREE_DATA *BINTREE_ID(clast)(
 }
 
 #ifdef BINTREE_USE_PARENT
-static inline const BINTREE_DATA *BINTREE_ID(cnext)(
+BINTREE_FN const BINTREE_DATA *BINTREE_ID(cnext)(
 		const BINTREE_DATA *n)
 {
 	if(BINTREE_R(n))
@@ -743,7 +744,7 @@ static inline const BINTREE_DATA *BINTREE_ID(cnext)(
 	return n;
 }
 
-static inline const BINTREE_DATA *BINTREE_ID(cprev)(
+BINTREE_FN const BINTREE_DATA *BINTREE_ID(cprev)(
 		const BINTREE_DATA *n)
 {
 	if(BINTREE_L(n))
@@ -757,7 +758,7 @@ static inline const BINTREE_DATA *BINTREE_ID(cprev)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-static inline const BINTREE_DATA *BINTREE_ID(cat)(
+BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 		const BINTREE_DATA *n,
 		size_t index)
 {

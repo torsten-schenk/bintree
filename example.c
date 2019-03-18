@@ -4,6 +4,7 @@ typedef struct mydata mydata_t;
 typedef struct mymulti mymulti_t;
 
 #define MYDATA_PREFIX mydata
+#define MYDATA_FN static inline
 #define MYDATA_DATA mydata_t
 #define MYDATA_FIELD node
 #define MYDATA_USE_PARENT 1
@@ -12,6 +13,7 @@ typedef struct mymulti mymulti_t;
 #define MYDATA_USE_BZERO 1
 
 #define MYASCEND_PREFIX myascend
+#define MYASCEND_FN static inline
 #define MYASCEND_DATA mymulti_t
 #define MYASCEND_FIELD ascend
 #define MYASCEND_USE_PARENT 1
@@ -20,6 +22,7 @@ typedef struct mymulti mymulti_t;
 #define MYASCEND_USE_BZERO 1
 
 #define MYDESCEND_PREFIX mydescend
+#define MYDESCEND_FN static inline
 #define MYDESCEND_DATA mymulti_t
 #define MYDESCEND_FIELD descend
 #define MYDESCEND_USE_PARENT 1
