@@ -542,7 +542,7 @@ BINTREE_FN void BINTREE_ID(remove)(
 #endif
 }
 
-/* take one node from bintree. use case: destroy whole tree using a loop. note that no rebalancing/metadata updates will take place, since the purpose is to destroy all elements in the tree. */
+/* take one node from bintree. use case: destroy whole tree using a loop. note that no rebalancing/metadata updates will take place, since the purpose is to destroy the tree structure. */
 BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
 		BINTREE_DATA **it)
 {
@@ -559,7 +559,7 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
 	/* purpose here is to put r into n's position (as left child of p) and continue with p. */
 	if(r) {
 		BINTREE_P(r) = p;
-		*it = r; /* we know that we will descend into r again in next loop iteration, so continue with r */
+		*it = r; /* we know that we will descend into r again in next loop iteration, so continue with r. it is also possible that there is no parent, so it is mandatory to store r here. */
 	}
 	else
 		*it = p;
@@ -577,16 +577,16 @@ BINTREE_FN void BINTREE_ID(sort)(
 	BINTREE_DATA *p;
 	BINTREE_DATA *n;
 	BINTREE_DATA *d; /* destination node for insertion */
-	BINTREE_DATA *s = *root; /* source node */
+	BINTREE_DATA *s; /* source node */
+	BINTREE_DATA *old = *root; /* deconstruction iterator */
 	int cmp;
 
 	*root = BINTREE_NULL;
 
 	/* we don't care about additional information like size and balancing factor to be correct here, we just need the structure of the tree to deconstruct it */
-	while(s) {
-		for(; BINTREE_L(s); s = BINTREE_L(s));
-		p = BINTREE_P(s);
-		r = BINTREE_R(s);
+	while(old) {
+		/* take one element from source tree */
+		s = BINTREE_ID(decon)(&old);
 
 		/* perform upper search */
 		d = BINTREE_NULL;
@@ -605,16 +605,6 @@ BINTREE_FN void BINTREE_ID(sort)(
 		bzero(BINTREE_TONODE(s), sizeof(BINTREE_ID(node_t)));
 #endif
 		BINTREE_ID(insert)(root, d, s);
-
-		/* purpose here is to put r into s's position (as left child of p) and continue with p. */
-		if(r) {
-			BINTREE_P(r) = p;
-			s = r; /* we know that we will descend into r again in next loop iteration, so continue with r */
-		}
-		else
-			s = p;
-		if(p)
-			BINTREE_L(p) = r;
 	}
 }
 #endif
