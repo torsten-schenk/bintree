@@ -23,6 +23,37 @@
 typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
 typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
 
+#ifdef BINTREE_DEBUG
+BINTREE_FN void BINTREE_ID(dump) (
+		const BINTREE_DATA *n,
+		int indent)
+{
+	if(!n)
+		return;
+	for(int i = 0; i < indent; i++)
+		printf("  ");
+	printf("node=%p p=%p l=%p r=%p\n", n, BINTREE_P(n), BINTREE_L(n), BINTREE_R(n));
+	BINTREE_ID(dump)(BINTREE_L(n), indent + 1);
+	BINTREE_ID(dump)(BINTREE_R(n), indent + 1);
+}
+
+BINTREE_FN void BINTREE_ID(validate) (
+		const BINTREE_DATA *n)
+{
+	const BINTREE_DATA *c;
+	if(!n)
+		return;
+	c = BINTREE_L(n);
+	if(c && BINTREE_P(c) != n)
+		printf("left child of %p has invalid parent\n", n);
+	BINTREE_ID(validate)(c);
+	c = BINTREE_R(n);
+	if(c && BINTREE_P(c) != n)
+		printf("right child of %p has invalid parent\n", n);
+	BINTREE_ID(validate)(c);
+}
+#endif
+
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
 BINTREE_FN int BINTREE_ID(query) (
 		BINTREE_DATA *root,
@@ -509,6 +540,33 @@ BINTREE_FN void BINTREE_ID(remove)(
 		zp = BINTREE_P(zp);
 	}
 #endif
+}
+
+/* take one node from bintree. use case: destroy whole tree using a loop. note that no rebalancing/metadata updates will take place, since the purpose is to destroy all elements in the tree. */
+BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
+		BINTREE_DATA **it)
+{
+	BINTREE_DATA *n = *it;
+	BINTREE_DATA *r;
+	BINTREE_DATA *p;
+
+	if(!n)
+		return NULL;
+	for(; BINTREE_L(n); n = BINTREE_L(n));
+	p = BINTREE_P(n);
+	r = BINTREE_R(n);
+
+	/* purpose here is to put r into n's position (as left child of p) and continue with p. */
+	if(r) {
+		BINTREE_P(r) = p;
+		*it = r; /* we know that we will descend into r again in next loop iteration, so continue with r */
+	}
+	else
+		*it = p;
+	if(p)
+		BINTREE_L(p) = r;
+
+	return n;
 }
 
 BINTREE_FN void BINTREE_ID(sort)(
