@@ -573,8 +573,6 @@ BINTREE_FN void BINTREE_ID(sort)(
 		BINTREE_DATA **root,
 		BINTREE_ID(cmp_t) cmpfn)
 {
-	BINTREE_DATA *r;
-	BINTREE_DATA *p;
 	BINTREE_DATA *n;
 	BINTREE_DATA *d; /* destination node for insertion */
 	BINTREE_DATA *s; /* source node */
