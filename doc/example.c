@@ -11,6 +11,7 @@ typedef struct mymulti mymulti_t;
 #define MYDATA_USE_INDEX 1
 #define MYDATA_USE_AVL 1
 #define MYDATA_USE_BZERO 1
+#define MYDATA_INDEX size_t
 
 #define MYASCEND_PREFIX myascend
 #define MYASCEND_FN static inline
@@ -20,6 +21,7 @@ typedef struct mymulti mymulti_t;
 #define MYASCEND_USE_INDEX 1
 #define MYASCEND_USE_AVL 1
 #define MYASCEND_USE_BZERO 1
+#define MYASCEND_INDEX size_t
 
 #define MYDESCEND_PREFIX mydescend
 #define MYDESCEND_FN static inline
@@ -29,6 +31,7 @@ typedef struct mymulti mymulti_t;
 #define MYDESCEND_USE_INDEX 1
 #define MYDESCEND_USE_AVL 1
 #define MYDESCEND_USE_BZERO 1
+#define MYDESCEND_INDEX size_t
 
 struct mydata {
 #define BINTREE_CONFIG MYDATA

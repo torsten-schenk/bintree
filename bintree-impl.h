@@ -12,6 +12,7 @@
 #endif
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_INDEX) != 0
 #define BINTREE_USE_INDEX
+#define BINTREE_INDEX BINTREE_SCONCAT2(BINTREE_CONFIG, _INDEX)
 #endif
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_AVL) != 0
 #define BINTREE_USE_AVL
@@ -208,9 +209,9 @@ BINTREE_FN void BINTREE_ID(ror)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-	size_t sl;
-	size_t sm;
-	size_t sr;
+	BINTREE_INDEX sl;
+	BINTREE_INDEX sm;
+	BINTREE_INDEX sr;
 #endif
 
 #ifdef BINTREE_USE_INDEX
@@ -265,9 +266,9 @@ BINTREE_FN void BINTREE_ID(rol)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-	size_t sl;
-	size_t sm;
-	size_t sr;
+	BINTREE_INDEX sl;
+	BINTREE_INDEX sm;
+	BINTREE_INDEX sr;
 #endif
 
 #ifdef BINTREE_USE_INDEX
@@ -608,17 +609,17 @@ BINTREE_FN void BINTREE_ID(sort)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-BINTREE_FN size_t BINTREE_ID(size)(
+BINTREE_FN BINTREE_INDEX BINTREE_ID(size)(
 		const BINTREE_DATA *n)
 {
 	return BINTREE_SIZE(n);
 }
 
-BINTREE_FN size_t BINTREE_ID(index)(
+BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
 		const BINTREE_DATA *n)
 {
 	const BINTREE_DATA *c;
-	size_t idx;
+	BINTREE_INDEX idx;
 	if(BINTREE_L(n))
 		idx = BINTREE_SIZE(BINTREE_L(n));
 	else
@@ -637,9 +638,9 @@ BINTREE_FN size_t BINTREE_ID(index)(
 
 BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
 		BINTREE_DATA *n,
-		size_t index)
+		BINTREE_INDEX index)
 {
-	size_t lsz;
+	BINTREE_INDEX lsz;
 
 	while(n) {
 		if(BINTREE_L(n))
@@ -806,9 +807,9 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cprev)(
 #ifdef BINTREE_USE_INDEX
 BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 		const BINTREE_DATA *n,
-		size_t index)
+		BINTREE_INDEX index)
 {
-	size_t lsz;
+	BINTREE_INDEX lsz;
 
 	while(n) {
 		if(BINTREE_L(n))
@@ -832,6 +833,7 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_DATA
 #undef BINTREE_PREFIX
 #undef BINTREE_FIELD
+#undef BINTREE_INDEX
 #undef BINTREE_USE_PARENT
 #undef BINTREE_USE_INDEX
 #undef BINTREE_USE_AVL
