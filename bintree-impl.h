@@ -601,7 +601,7 @@ BINTREE_FN void BINTREE_ID(sort)(
 
 #ifndef BINTREE_USE_BZERO
 		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
-		bzero(BINTREE_TONODE(s), sizeof(BINTREE_ID(node_t)));
+		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
 #endif
 		BINTREE_ID(insert)(root, d, s);
 	}
