@@ -552,7 +552,7 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
 	BINTREE_DATA *p;
 
 	if(!n)
-		return NULL;
+		return BINTREE_NULL;
 	for(; BINTREE_L(n); n = BINTREE_L(n));
 	p = BINTREE_P(n);
 	r = BINTREE_R(n);
