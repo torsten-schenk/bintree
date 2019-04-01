@@ -615,27 +615,6 @@ BINTREE_FN BINTREE_INDEX BINTREE_ID(size)(
 	return BINTREE_SIZE(n);
 }
 
-BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
-		const BINTREE_DATA *n)
-{
-	const BINTREE_DATA *c;
-	BINTREE_INDEX idx;
-	if(BINTREE_L(n))
-		idx = BINTREE_SIZE(BINTREE_L(n));
-	else
-		idx = 0;
-	while(BINTREE_P(n)) {
-		c = n;
-		n = BINTREE_P(n);
-		if(BINTREE_R(n) == c) {
-			idx++;
-			if(BINTREE_L(n))
-				idx += BINTREE_SIZE(BINTREE_L(n));
-		}
-	}
-	return idx;
-}
-
 BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
 		BINTREE_DATA *n,
 		BINTREE_INDEX index)
@@ -659,6 +638,29 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
 	}
 	return BINTREE_NULL;
 }
+
+#ifdef BINTREE_USE_PARENT
+BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
+		const BINTREE_DATA *n)
+{
+	const BINTREE_DATA *c;
+	BINTREE_INDEX idx;
+	if(BINTREE_L(n))
+		idx = BINTREE_SIZE(BINTREE_L(n));
+	else
+		idx = 0;
+	while(BINTREE_P(n)) {
+		c = n;
+		n = BINTREE_P(n);
+		if(BINTREE_R(n) == c) {
+			idx++;
+			if(BINTREE_L(n))
+				idx += BINTREE_SIZE(BINTREE_L(n));
+		}
+	}
+	return idx;
+}
+#endif
 #endif
 
 /* CONST IMPLEMENTATION */
