@@ -7,12 +7,6 @@
 #define BINTREE_CONCAT2(A, B) BINTREE_CONCAT(A, B)
 #define BINTREE_ID(ID) BINTREE_CONCAT2(BINTREE_PREFIX, ID)
 #define BINTREE_NULL ((void*)0)
-#define BINTREE_TONODE(X) (&(X)->BINTREE_FIELD)
-#define BINTREE_L(X) (X->BINTREE_FIELD.l)
-#define BINTREE_R(X) (X->BINTREE_FIELD.r)
-#define BINTREE_P(X) (X->BINTREE_FIELD.p)
-#define BINTREE_B(X) (X->BINTREE_FIELD.b)
-#define BINTREE_SIZE(X) (X->BINTREE_FIELD.size)
 #endif
 
 #ifndef BINTREE_CONFIG
@@ -22,6 +16,9 @@
 #define BINTREE_FIELD BINTREE_SCONCAT2(BINTREE_CONFIG, _FIELD)
 #define BINTREE_DATA BINTREE_SCONCAT2(BINTREE_CONFIG, _DATA)
 
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_MULTI) != 0
+#define BINTREE_USE_MULTI
+#endif
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_PARENT) != 0
 #define BINTREE_USE_PARENT
 #endif
@@ -33,7 +30,12 @@
 #define BINTREE_USE_AVL
 #endif
 
+/* if BINTREE_USE_MULTI is specified, an array of BINTREE_FIELD is expected to be present in BINTREE_DATA.
+ * including this file will create the BINTREE_FIELD struct.
+ * otherwise, including this file will create an anonymous field in the data struct named BINTREE_FIELD. */
+#ifndef BINTREE_USE_MULTI
 struct {
+#endif
 #ifdef BINTREE_USE_PARENT
 	BINTREE_DATA *p;
 #endif
@@ -45,7 +47,9 @@ struct {
 #ifdef BINTREE_USE_AVL
 	int b;
 #endif
+#ifndef BINTREE_USE_MULTI
 } BINTREE_FIELD;
+#endif
 
 #undef BINTREE_DATA
 #undef BINTREE_FIELD
@@ -53,6 +57,7 @@ struct {
 #undef BINTREE_USE_PARENT
 #undef BINTREE_USE_INDEX
 #undef BINTREE_USE_AVL
+#undef BINTREE_USE_MULTI
 #undef BINTREE_CONFIG
 
 #endif

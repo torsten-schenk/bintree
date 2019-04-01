@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 typedef struct mydata mydata_t;
+typedef struct mytwo mytwo_t;
 typedef struct mymulti mymulti_t;
 
 #define MYDATA_PREFIX mydata
@@ -15,7 +16,7 @@ typedef struct mymulti mymulti_t;
 
 #define MYASCEND_PREFIX myascend
 #define MYASCEND_FN static inline
-#define MYASCEND_DATA mymulti_t
+#define MYASCEND_DATA mytwo_t
 #define MYASCEND_FIELD ascend
 #define MYASCEND_USE_PARENT 1
 #define MYASCEND_USE_INDEX 1
@@ -25,7 +26,7 @@ typedef struct mymulti mymulti_t;
 
 #define MYDESCEND_PREFIX mydescend
 #define MYDESCEND_FN static inline
-#define MYDESCEND_DATA mymulti_t
+#define MYDESCEND_DATA mytwo_t
 #define MYDESCEND_FIELD descend
 #define MYDESCEND_USE_PARENT 1
 #define MYDESCEND_USE_INDEX 1
@@ -33,13 +34,25 @@ typedef struct mymulti mymulti_t;
 #define MYDESCEND_USE_BZERO 1
 #define MYDESCEND_INDEX size_t
 
+#define MYMULTI_PREFIX mymulti
+#define MYMULTI_FIELD fields
+#define MYMULTI_FN static inline
+#define MYMULTI_DATA mymulti_t
+#define MYMULTI_USE_PARENT 1
+#define MYMULTI_USE_INDEX 1
+#define MYMULTI_USE_AVL 1
+#define MYMULTI_USE_BZERO 1
+#define MYMULTI_USE_MULTI 1
+#define MYMULTI_INDEX size_t
+#define MYMULTI_MULTI int
+
 struct mydata {
 #define BINTREE_CONFIG MYDATA
 #include "bintree-hdr.h"
 	int value;
 };
 
-struct mymulti {
+struct mytwo {
 #define BINTREE_CONFIG MYASCEND
 #include "bintree-hdr.h"
 #define BINTREE_CONFIG MYDESCEND
@@ -47,11 +60,23 @@ struct mymulti {
 	int value;
 };
 
+struct mymulti_field {
+#define BINTREE_CONFIG MYMULTI
+#include "bintree-hdr.h"
+};
+
+struct mymulti {
+	struct mymulti_field fields[10];
+};
+
+
 #define BINTREE_CONFIG MYDATA
 #include "bintree-impl.h"
 #define BINTREE_CONFIG MYASCEND
 #include "bintree-impl.h"
 #define BINTREE_CONFIG MYDESCEND
+#include "bintree-impl.h"
+#define BINTREE_CONFIG MYMULTI
 #include "bintree-impl.h"
 
 static mydata_t *root = NULL;
@@ -82,8 +107,8 @@ static int cmp_field(
 }
 
 static int cmp_ascend(
-		const mymulti_t *a,
-		const mymulti_t *b)
+		const mytwo_t *a,
+		const mytwo_t *b)
 {
 	if(a->value < b->value)
 		return -1;
@@ -94,8 +119,8 @@ static int cmp_ascend(
 }
 
 static int cmp_descend(
-		const mymulti_t *a,
-		const mymulti_t *b)
+		const mytwo_t *a,
+		const mytwo_t *b)
 {
 	if(a->value < b->value)
 		return 1;
@@ -129,16 +154,16 @@ static mydata_t *upper(
 }
 
 
-static void example_multi()
+static void example_two()
 {
-	mymulti_t *ascend = NULL;
-	mymulti_t *descend = NULL;
-	mymulti_t data[256];
+	mytwo_t *ascend = NULL;
+	mytwo_t *descend = NULL;
+	mytwo_t data[256];
 	for(size_t i = 0; i < sizeof(data) / sizeof(*data); i++)
 		data[i].value = i % 16;
 
 	for(size_t i = 0; i < 32; i++) {
-		mymulti_t *pos;
+		mytwo_t *pos;
 		myascend_find(ascend, data + i, NULL, &pos, cmp_ascend);
 		myascend_insert(&ascend, pos, data + i);
 
@@ -147,10 +172,10 @@ static void example_multi()
 	}
 
 	printf("ascending:\n");
-	for(mymulti_t *cur = myascend_first(ascend); cur; cur = myascend_next(cur))
+	for(mytwo_t *cur = myascend_first(ascend); cur; cur = myascend_next(cur))
 		printf("IS: %p %d\n", cur, cur->value);
 	printf("descending:\n");
-	for(mymulti_t *cur = mydescend_first(descend); cur; cur = mydescend_next(cur))
+	for(mytwo_t *cur = mydescend_first(descend); cur; cur = mydescend_next(cur))
 		printf("IS: %p %d\n", cur, cur->value);
 }
 
@@ -202,7 +227,7 @@ int main()
 
 
 
-	example_multi();
+	example_two();
 
 	return 0;
 }

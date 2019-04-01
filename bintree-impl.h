@@ -7,6 +7,26 @@
 #define BINTREE_DATA BINTREE_SCONCAT2(BINTREE_CONFIG, _DATA)
 #define BINTREE_FN BINTREE_SCONCAT2(BINTREE_CONFIG, _FN)
 
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_MULTI) != 0
+#define BINTREE_USE_MULTI
+#define BINTREE_MULTI BINTREE_SCONCAT2(BINTREE_CONFIG, _MULTI)
+#define BINTREE_TONODE(X) ((X)->BINTREE_FIELD + multi)
+#define BINTREE_L(X) (X->BINTREE_FIELD[multi].l)
+#define BINTREE_R(X) (X->BINTREE_FIELD[multi].r)
+#define BINTREE_P(X) (X->BINTREE_FIELD[multi].p)
+#define BINTREE_B(X) (X->BINTREE_FIELD[multi].b)
+#define BINTREE_SIZE(X) (X->BINTREE_FIELD[multi].size)
+#define BINTREE_CALL(X, ...) BINTREE_ID(X)(multi, __VA_ARGS__)
+#else
+#define BINTREE_TONODE(X) (&(X)->BINTREE_FIELD)
+#define BINTREE_L(X) (X->BINTREE_FIELD.l)
+#define BINTREE_R(X) (X->BINTREE_FIELD.r)
+#define BINTREE_P(X) (X->BINTREE_FIELD.p)
+#define BINTREE_B(X) (X->BINTREE_FIELD.b)
+#define BINTREE_SIZE(X) (X->BINTREE_FIELD.size)
+#define BINTREE_CALL(X, ...) BINTREE_ID(X)(__VA_ARGS__)
+#endif
+
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_PARENT) != 0
 #define BINTREE_USE_PARENT
 #endif
@@ -57,6 +77,9 @@ BINTREE_FN void BINTREE_ID(validate) (
 
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
 BINTREE_FN int BINTREE_ID(query) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *root,
 		const void *query,
 		BINTREE_DATA **lret,
@@ -106,6 +129,9 @@ BINTREE_FN int BINTREE_ID(query) (
 }
 
 BINTREE_FN int BINTREE_ID(find) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *root,
 		const BINTREE_DATA *data,
 		BINTREE_DATA **lret,
@@ -155,6 +181,9 @@ BINTREE_FN int BINTREE_ID(find) (
 }
 
 BINTREE_FN BINTREE_DATA *BINTREE_ID(first)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *n)
 {
 	if(n)
@@ -163,6 +192,9 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(first)(
 }
 
 BINTREE_FN BINTREE_DATA *BINTREE_ID(last)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *n)
 {
 	if(n)
@@ -172,6 +204,9 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(last)(
 
 #ifdef BINTREE_USE_PARENT
 BINTREE_FN BINTREE_DATA *BINTREE_ID(next)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *n)
 {
 	if(BINTREE_R(n))
@@ -184,6 +219,9 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(next)(
 }
 
 BINTREE_FN BINTREE_DATA *BINTREE_ID(prev)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *n)
 {
 	if(BINTREE_L(n))
@@ -196,6 +234,9 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(prev)(
 }
 
 BINTREE_FN void BINTREE_ID(ror)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA **root,
 		BINTREE_DATA *n)
 {
@@ -253,6 +294,9 @@ BINTREE_FN void BINTREE_ID(ror)(
 }
 
 BINTREE_FN void BINTREE_ID(rol)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA **root,
 		BINTREE_DATA *n)
 {
@@ -311,6 +355,9 @@ BINTREE_FN void BINTREE_ID(rol)(
 
 /* insert 'n' node before 'p' */
 BINTREE_FN void BINTREE_ID(insert)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA **root,
 		BINTREE_DATA *p,
 		BINTREE_DATA *n)
@@ -353,11 +400,11 @@ BINTREE_FN void BINTREE_ID(insert)(
 			else if(BINTREE_B(p) > 0) { /* b = 1 */
 				BINTREE_B(p)++;
 				if(BINTREE_B(n) < 0) { /* b = -1 */
-					BINTREE_ID(rol)(root, BINTREE_R(n));
-					BINTREE_ID(ror)(root, BINTREE_P(n));
+					BINTREE_CALL(rol, root, BINTREE_R(n));
+					BINTREE_CALL(ror, root, BINTREE_P(n));
 				}
 				else
-					BINTREE_ID(ror)(root, n);
+					BINTREE_CALL(ror, root, n);
 				break;
 			}
 			else { /* b = -1 */
@@ -371,11 +418,11 @@ BINTREE_FN void BINTREE_ID(insert)(
 			else if(BINTREE_B(p) < 0) { /* b = -1 */
 				BINTREE_B(p)--;
 				if(BINTREE_B(n) > 0) { /* b = 1 */
-					BINTREE_ID(ror)(root, BINTREE_L(n));
-					BINTREE_ID(rol)(root, BINTREE_P(n));
+					BINTREE_CALL(ror, root, BINTREE_L(n));
+					BINTREE_CALL(rol, root, BINTREE_P(n));
 				}
 				else
-					BINTREE_ID(rol)(root, n);
+					BINTREE_CALL(rol, root, n);
 				break;
 			}
 			else { /* b = 1 */
@@ -388,6 +435,9 @@ BINTREE_FN void BINTREE_ID(insert)(
 }
 
 BINTREE_FN void BINTREE_ID(remove)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA **root,
 		BINTREE_DATA *x)
 {
@@ -499,15 +549,15 @@ BINTREE_FN void BINTREE_ID(remove)(
 				c = BINTREE_L(zp);
 				BINTREE_B(zp)++;
 				if(!BINTREE_B(c)) { /* case 2 */
-					BINTREE_ID(ror)(root, c);
+					BINTREE_CALL(ror, root, c);
 					break;
 				}
 				else if(BINTREE_B(c) < 0) { /* case 3 */
-					BINTREE_ID(rol)(root, BINTREE_R(c));
-					BINTREE_ID(ror)(root, BINTREE_P(c));
+					BINTREE_CALL(rol, root, BINTREE_R(c));
+					BINTREE_CALL(ror, root, BINTREE_P(c));
 				}
 				else /* case 4 */
-					BINTREE_ID(ror)(root, c);
+					BINTREE_CALL(ror, root, c);
 			}
 			else /* case 5 */
 				BINTREE_B(zp)++;
@@ -521,15 +571,15 @@ BINTREE_FN void BINTREE_ID(remove)(
 				c = BINTREE_R(zp);
 				BINTREE_B(zp)--;
 				if(!BINTREE_B(c)) {
-					BINTREE_ID(rol)(root, c);
+					BINTREE_CALL(rol, root, c);
 					break;
 				}
 				else if(BINTREE_B(c) > 0) {
-					BINTREE_ID(ror)(root, BINTREE_L(c));
-					BINTREE_ID(rol)(root, BINTREE_P(c));
+					BINTREE_CALL(ror, root, BINTREE_L(c));
+					BINTREE_CALL(rol, root, BINTREE_P(c));
 				}
 				else
-					BINTREE_ID(rol)(root, c);
+					BINTREE_CALL(rol, root, c);
 			}
 			else
 				BINTREE_B(zp)--;
@@ -545,6 +595,9 @@ BINTREE_FN void BINTREE_ID(remove)(
 
 /* take one node from bintree. use case: destroy whole tree using a loop. note that no rebalancing/metadata updates will take place, since the purpose is to destroy the tree structure. */
 BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA **it)
 {
 	BINTREE_DATA *n = *it;
@@ -571,6 +624,9 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
 }
 
 BINTREE_FN void BINTREE_ID(sort)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA **root,
 		BINTREE_ID(cmp_t) cmpfn)
 {
@@ -585,7 +641,7 @@ BINTREE_FN void BINTREE_ID(sort)(
 	/* we don't care about additional information like size and balancing factor to be correct here, we just need the structure of the tree to deconstruct it */
 	while(old) {
 		/* take one element from source tree */
-		s = BINTREE_ID(decon)(&old);
+		s = BINTREE_CALL(decon, &old);
 
 		/* perform upper search */
 		d = BINTREE_NULL;
@@ -603,19 +659,25 @@ BINTREE_FN void BINTREE_ID(sort)(
 		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
 		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
 #endif
-		BINTREE_ID(insert)(root, d, s);
+		BINTREE_CALL(insert, root, d, s);
 	}
 }
 #endif
 
 #ifdef BINTREE_USE_INDEX
 BINTREE_FN BINTREE_INDEX BINTREE_ID(size)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n)
 {
 	return BINTREE_SIZE(n);
 }
 
 BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		BINTREE_DATA *n,
 		BINTREE_INDEX index)
 {
@@ -641,6 +703,9 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
 
 #ifdef BINTREE_USE_PARENT
 BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n)
 {
 	const BINTREE_DATA *c;
@@ -667,6 +732,9 @@ BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
 
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
 BINTREE_FN int BINTREE_ID(cquery) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *root,
 		const void *query,
 		const BINTREE_DATA **lret,
@@ -716,6 +784,9 @@ BINTREE_FN int BINTREE_ID(cquery) (
 }
 
 BINTREE_FN int BINTREE_ID(cfind) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *root,
 		const BINTREE_DATA *data,
 		const BINTREE_DATA **lret,
@@ -765,6 +836,9 @@ BINTREE_FN int BINTREE_ID(cfind) (
 }
 
 BINTREE_FN const BINTREE_DATA *BINTREE_ID(cfirst)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n)
 {
 	if(n)
@@ -773,6 +847,9 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cfirst)(
 }
 
 BINTREE_FN const BINTREE_DATA *BINTREE_ID(clast)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n)
 {
 	if(n)
@@ -782,6 +859,9 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(clast)(
 
 #ifdef BINTREE_USE_PARENT
 BINTREE_FN const BINTREE_DATA *BINTREE_ID(cnext)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n)
 {
 	if(BINTREE_R(n))
@@ -794,6 +874,9 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cnext)(
 }
 
 BINTREE_FN const BINTREE_DATA *BINTREE_ID(cprev)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n)
 {
 	if(BINTREE_L(n))
@@ -808,6 +891,9 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cprev)(
 
 #ifdef BINTREE_USE_INDEX
 BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
 		const BINTREE_DATA *n,
 		BINTREE_INDEX index)
 {
@@ -840,7 +926,16 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_USE_INDEX
 #undef BINTREE_USE_AVL
 #undef BINTREE_USE_BZERO
+#undef BINTREE_USE_MULTI
 #undef BINTREE_CONFIG
+#undef BINTREE_MULTI
+#undef BINTREE_TONODE
+#undef BINTREE_L
+#undef BINTREE_R
+#undef BINTREE_P
+#undef BINTREE_B
+#undef BINTREE_SIZE
 #undef BINTREE_FN
+#undef BINTREE_CALL
 #endif
 
