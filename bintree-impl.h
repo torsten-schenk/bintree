@@ -692,7 +692,10 @@ BINTREE_FN BINTREE_INDEX BINTREE_ID(size)(
 #endif
 		const BINTREE_DATA *n)
 {
-	return BINTREE_SIZE(n);
+	if(n)
+		return BINTREE_SIZE(n);
+	else
+		return 0;
 }
 
 BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
