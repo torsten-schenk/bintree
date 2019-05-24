@@ -62,7 +62,7 @@ BINTREE_FN void BINTREE_ID(dump) (
 		return;
 	for(int i = 0; i < indent; i++)
 		printf("  ");
-	printf("node=%p p=%p l=%p r=%p\n", n, BINTREE_P(n), BINTREE_L(n), BINTREE_R(n));
+	printf("node=%p b=%d p=%p l=%p r=%p\n", n, BINTREE_B(n), BINTREE_P(n), BINTREE_L(n), BINTREE_R(n));
 	BINTREE_ID(dump)(BINTREE_L(n), indent + 1);
 	BINTREE_ID(dump)(BINTREE_R(n), indent + 1);
 }
@@ -466,6 +466,7 @@ BINTREE_FN void BINTREE_ID(remove)(
 #endif
 
 	if(BINTREE_L(x) && BINTREE_R(x)) {
+		/* find predecessor of x */
 		y = BINTREE_L(x);
 		if(BINTREE_R(y)) {
 			/* descend to rightmost node */
@@ -556,47 +557,55 @@ BINTREE_FN void BINTREE_ID(remove)(
 
 	/* if zr: right subtree of zp has been decreased in height
 	 * otherwise: left subtree of zp has been decresed in height */
+	printf("UPDATE AVL: %p\n", zp);
 	while(zp) {
+		/* zp is the root of the subtree to be updated. after update, this must still hold. */
 		if(zr) {
 			if(!BINTREE_B(zp)) { /* case 1 */
 				BINTREE_B(zp)++;
-				break;
+				break; /* no further updates required */
 			}
 			else if(BINTREE_B(zp) > 0) {
 				c = BINTREE_L(zp);
 				BINTREE_B(zp)++;
 				if(!BINTREE_B(c)) { /* case 2 */
 					BINTREE_CALL(ror, root, c);
-					break;
+					break; /* no further updates required */
 				}
 				else if(BINTREE_B(c) < 0) { /* case 3 */
-					BINTREE_CALL(rol, root, BINTREE_R(c));
-					BINTREE_CALL(ror, root, BINTREE_P(c));
+					zp = BINTREE_R(c);
+					BINTREE_CALL(rol, root, zp);
+					BINTREE_CALL(ror, root, zp);
 				}
-				else /* case 4 */
-					BINTREE_CALL(ror, root, c);
+				else { /* case 4 */
+					zp = c;
+					BINTREE_CALL(ror, root, zp);
+				}
 			}
 			else /* case 5 */
 				BINTREE_B(zp)++;
 		}
 		else {
-			if(!BINTREE_B(zp)) {
+			if(!BINTREE_B(zp)) { /* case 1 */
 				BINTREE_B(zp)--;
-				break;
+				break; /* no further updates required */
 			}
 			else if(BINTREE_B(zp) < 0) {
 				c = BINTREE_R(zp);
 				BINTREE_B(zp)--;
-				if(!BINTREE_B(c)) {
+				if(!BINTREE_B(c)) { /* case 2 */
 					BINTREE_CALL(rol, root, c);
-					break;
+					break; /* no further updates required */
 				}
-				else if(BINTREE_B(c) > 0) {
-					BINTREE_CALL(ror, root, BINTREE_L(c));
-					BINTREE_CALL(rol, root, BINTREE_P(c));
+				else if(BINTREE_B(c) > 0) { /* case 3 */
+					zp = BINTREE_L(c);
+					BINTREE_CALL(ror, root, zp);
+					BINTREE_CALL(rol, root, zp);
 				}
-				else
-					BINTREE_CALL(rol, root, c);
+				else { /* case 4 */
+					zp = c;
+					BINTREE_CALL(rol, root, zp);
+				}
 			}
 			else
 				BINTREE_B(zp)--;
