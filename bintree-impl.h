@@ -557,7 +557,6 @@ BINTREE_FN void BINTREE_ID(remove)(
 
 	/* if zr: right subtree of zp has been decreased in height
 	 * otherwise: left subtree of zp has been decresed in height */
-	printf("UPDATE AVL: %p\n", zp);
 	while(zp) {
 		/* zp is the root of the subtree to be updated. after update, this must still hold. */
 		if(zr) {
