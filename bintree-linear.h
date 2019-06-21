@@ -1,4 +1,7 @@
-static inline bool binsearch(
+/* return:
+ *   0: exact match not found
+ *   1: exact match found at least once */
+static inline int binsearch(
 		const void *base,
 		size_t nitems,
 		size_t size,
@@ -11,7 +14,7 @@ static inline bool binsearch(
 	size_t m;
 	size_t u;
 	int cmp;
-	bool ret = false;
+	int ret = 0;
 	const void *cur;
 	size_t cand;
 
@@ -25,7 +28,7 @@ static inline bool binsearch(
 			cmp = cmpfn(cur, search);
 			if(cmp >= 0) {
 				if(!cmp)
-					ret = true;
+					ret = 1;
 				cand = m;
 				u = m;
 			}
@@ -50,7 +53,7 @@ static inline bool binsearch(
 			}
 			else {
 				if(!cmp)
-					ret = true;
+					ret = 1;
 				l = m + 1;
 			}
 		}
