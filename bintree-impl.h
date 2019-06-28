@@ -733,6 +733,164 @@ BINTREE_FN BINTREE_DATA *BINTREE_ID(at)(
 	return BINTREE_NULL;
 }
 
+BINTREE_FN int BINTREE_ID(queryidx) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *root,
+		const void *query,
+		BINTREE_INDEX *lret,
+		BINTREE_INDEX *uret,
+		BINTREE_ID(qcmp_t) cmpfn
+#ifdef BINTREE_USE_CMPARG
+		, BINTREE_CMPARG cmparg
+#endif
+		)
+{
+	int cmp;
+	int ret = 0;
+	BINTREE_DATA *n;
+	BINTREE_INDEX i;
+	BINTREE_INDEX s = BINTREE_CALL(size, root);
+	BINTREE_INDEX c;
+
+	/* perform lower search */
+	if(lret || !uret) {
+		c = s;
+		if(root)
+			i = BINTREE_CALL(size, BINTREE_L(root));
+		else
+			i = 0;
+		for(n = root;;) {
+			cmp = BINTREE_CMP(cmpfn, n, query);
+			if(cmp >= 0) {
+				if(!cmp)
+					ret = 1;
+				c = i;
+				n = BINTREE_L(n);
+				if(!n)
+					break;
+				i -= BINTREE_CALL(size, BINTREE_R(n)) + 1;
+			}
+			else {
+				n = BINTREE_R(n);
+				if(!n)
+					break;
+				i += BINTREE_CALL(size, BINTREE_L(n)) + 1;
+			}
+		}
+		if(lret)
+			*lret = c;
+	}
+	/* perform upper search */
+	if(uret) {
+		c = s;
+		if(root)
+			i = BINTREE_CALL(size, BINTREE_L(root));
+		else
+			i = 0;
+		for(n = root;;) {
+			cmp = BINTREE_CMP(cmpfn, n, query);
+			if(cmp > 0) {
+				c = i;
+				n = BINTREE_L(n);
+				if(!n)
+					break;
+				i -= BINTREE_CALL(size, BINTREE_R(n)) + 1;
+			}
+			else {
+				if(!cmp)
+					ret = 1;
+				n = BINTREE_R(n);
+				if(!n)
+					break;
+				i += BINTREE_CALL(size, BINTREE_L(n)) + 1;
+			}
+		}
+		*uret = c;
+	}
+	return ret;
+}
+
+BINTREE_FN int BINTREE_ID(findidx) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *root,
+		BINTREE_DATA *data,
+		BINTREE_INDEX *lret,
+		BINTREE_INDEX *uret,
+		BINTREE_ID(qcmp_t) cmpfn
+#ifdef BINTREE_USE_CMPARG
+		, BINTREE_CMPARG cmparg
+#endif
+		)
+{
+	int cmp;
+	int ret = 0;
+	BINTREE_DATA *n;
+	BINTREE_INDEX i;
+	BINTREE_INDEX s = BINTREE_CALL(size, root);
+	BINTREE_INDEX c;
+
+	/* perform lower search */
+	if(lret || !uret) {
+		c = s;
+		if(root)
+			i = BINTREE_CALL(size, BINTREE_L(root));
+		else
+			i = 0;
+		for(n = root;;) {
+			cmp = BINTREE_CMP(cmpfn, n, data);
+			if(cmp >= 0) {
+				if(!cmp)
+					ret = 1;
+				c = i;
+				n = BINTREE_L(n);
+				if(!n)
+					break;
+				i -= BINTREE_CALL(size, BINTREE_R(n)) + 1;
+			}
+			else {
+				n = BINTREE_R(n);
+				if(!n)
+					break;
+				i += BINTREE_CALL(size, BINTREE_L(n)) + 1;
+			}
+		}
+		if(lret)
+			*lret = c;
+	}
+	/* perform upper search */
+	if(uret) {
+		c = s;
+		if(root)
+			i = BINTREE_CALL(size, BINTREE_L(root));
+		else
+			i = 0;
+		for(n = root;;) {
+			cmp = BINTREE_CMP(cmpfn, n, data);
+			if(cmp > 0) {
+				c = i;
+				n = BINTREE_L(n);
+				if(!n)
+					break;
+				i -= BINTREE_CALL(size, BINTREE_R(n)) + 1;
+			}
+			else {
+				if(!cmp)
+					ret = 1;
+				n = BINTREE_R(n);
+				if(!n)
+					break;
+				i += BINTREE_CALL(size, BINTREE_L(n)) + 1;
+			}
+		}
+		*uret = c;
+	}
+	return ret;
+}
+
 #ifdef BINTREE_USE_PARENT
 BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
 #ifdef BINTREE_USE_MULTI
