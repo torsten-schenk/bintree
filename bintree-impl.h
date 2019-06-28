@@ -754,13 +754,18 @@ BINTREE_FN int BINTREE_ID(queryidx) (
 	BINTREE_INDEX s = BINTREE_CALL(size, root);
 	BINTREE_INDEX c;
 
+	if(!root) {
+		if(lret)
+			*lret = 0;
+		if(uret)
+			*uret = 0;
+		return 0;
+	}
+
 	/* perform lower search */
 	if(lret || !uret) {
 		c = s;
-		if(root)
-			i = BINTREE_CALL(size, BINTREE_L(root));
-		else
-			i = 0;
+		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
 			cmp = BINTREE_CMP(cmpfn, n, query);
 			if(cmp >= 0) {
@@ -785,10 +790,7 @@ BINTREE_FN int BINTREE_ID(queryidx) (
 	/* perform upper search */
 	if(uret) {
 		c = s;
-		if(root)
-			i = BINTREE_CALL(size, BINTREE_L(root));
-		else
-			i = 0;
+		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
 			cmp = BINTREE_CMP(cmpfn, n, query);
 			if(cmp > 0) {
@@ -833,13 +835,18 @@ BINTREE_FN int BINTREE_ID(findidx) (
 	BINTREE_INDEX s = BINTREE_CALL(size, root);
 	BINTREE_INDEX c;
 
+	if(!root) {
+		if(lret)
+			*lret = 0;
+		if(uret)
+			*uret = 0;
+		return 0;
+	}
+
 	/* perform lower search */
 	if(lret || !uret) {
 		c = s;
-		if(root)
-			i = BINTREE_CALL(size, BINTREE_L(root));
-		else
-			i = 0;
+		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
 			cmp = BINTREE_CMP(cmpfn, n, data);
 			if(cmp >= 0) {
@@ -864,10 +871,7 @@ BINTREE_FN int BINTREE_ID(findidx) (
 	/* perform upper search */
 	if(uret) {
 		c = s;
-		if(root)
-			i = BINTREE_CALL(size, BINTREE_L(root));
-		else
-			i = 0;
+		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
 			cmp = BINTREE_CMP(cmpfn, n, data);
 			if(cmp > 0) {
