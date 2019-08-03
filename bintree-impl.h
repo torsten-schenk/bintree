@@ -691,6 +691,67 @@ BINTREE_FN void BINTREE_ID(sort)(
 		BINTREE_CALL(insert, root, d, s);
 	}
 }
+
+BINTREE_FN int BINTREE_ID(sort_abortable)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA **root,
+		BINTREE_ID(cmp_t) cmpfn,
+		int abortval /* if comparison function returns 'abortval', append remaining elements to new tree and return 'abortval'. */
+#ifdef BINTREE_USE_CMPARG
+		, BINTREE_CMPARG cmparg
+#endif
+		)
+{
+	BINTREE_DATA *n;
+	BINTREE_DATA *d; /* destination node for insertion */
+	BINTREE_DATA *s; /* source node */
+	BINTREE_DATA *old = *root; /* deconstruction iterator */
+	int cmp;
+
+	*root = BINTREE_NULL;
+
+	/* we don't care about additional information like size and balancing factor to be correct here, we just need the structure of the tree to deconstruct it */
+	while(old) {
+		/* take one element from source tree */
+		s = BINTREE_CALL(decon, &old);
+#ifndef BINTREE_USE_BZERO
+		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
+		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
+#endif
+
+		/* perform upper search */
+		d = BINTREE_NULL;
+		for(n = *root; n;) {
+			cmp = BINTREE_CMP(cmpfn, n, s);
+			if(cmp == abortval) {
+				BINTREE_CALL(insert, root, NULL, s);
+				goto abort;
+			}
+			else if(cmp > 0) {
+				d = n;
+				n = BINTREE_L(n);
+			}
+			else
+				n = BINTREE_R(n);
+		}
+
+		BINTREE_CALL(insert, root, d, s);
+	}
+	return 0;
+
+abort:
+	while(old) {
+		s = BINTREE_CALL(decon, &old);
+#ifndef BINTREE_USE_BZERO
+		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
+		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
+#endif
+		BINTREE_CALL(insert, root, NULL, s);
+	}
+	return abortval;
+}
 #endif
 
 #ifdef BINTREE_USE_INDEX
