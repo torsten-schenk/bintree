@@ -84,6 +84,30 @@ BINTREE_FN void BINTREE_ID(validate) (
 }
 #endif
 
+BINTREE_FN void BINTREE_ID(bzero) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *n
+)
+{
+	bzero(BINTREE_TONODE(n), sizeof(*BINTREE_TONODE(n)));
+}
+
+BINTREE_FN int BINTREE_ID(memberof) (
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *root,
+		BINTREE_DATA *n
+)
+{
+	for(; n; n = BINTREE_P(n))
+		if(n == root)
+			return 1;
+	return 0;
+}
+
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
 BINTREE_FN int BINTREE_ID(query) (
 #ifdef BINTREE_USE_MULTI
