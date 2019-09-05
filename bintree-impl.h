@@ -28,16 +28,27 @@
 #endif
 
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_CMPARG) != 0
-#define BINTREE_USE_CMPARG
-#define BINTREE_CMPARG BINTREE_SCONCAT2(BINTREE_CONFIG, _CMPARG)
-typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b, BINTREE_CMPARG cmparg);
-typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b, BINTREE_CMPARG cmparg);
-#define BINTREE_CMP(CMP, A, B) (CMP(A, B, cmparg))
+#define BINTREE_USE_QCMPARG
+#define BINTREE_USE_FCMPARG
+#define BINTREE_QCMPARG BINTREE_SCONCAT2(BINTREE_CONFIG, _CMPARG)
+#define BINTREE_FCMPARG BINTREE_SCONCAT2(BINTREE_CONFIG, _CMPARG)
+#endif
+
+#ifdef BINTREE_USE_QCMPARG
+typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b, BINTREE_QCMPARG cmparg);
+#define BINTREE_QCMP(CMP, A, B) (CMP(A, B, cmparg))
+#else
+typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
+#define BINTREE_QCMP(CMP, A, B) (CMP(A, B))
+#endif
+#ifdef BINTREE_USE_FCMPARG
+typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b, BINTREE_FCMPARG cmparg);
+#define BINTREE_FCMP(CMP, A, B) (CMP(A, B, cmparg))
 #else
 typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
-typedef int (*BINTREE_ID(qcmp_t))(const BINTREE_DATA *a, const void *b);
-#define BINTREE_CMP(CMP, A, B) (CMP(A, B))
+#define BINTREE_FCMP(CMP, A, B) (CMP(A, B))
 #endif
+
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_PARENT) != 0
 #define BINTREE_USE_PARENT
 #endif
@@ -118,8 +129,8 @@ BINTREE_FN int BINTREE_ID(query) (
 		BINTREE_DATA **lret,
 		BINTREE_DATA **uret,
 		BINTREE_ID(qcmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_QCMPARG
+		, BINTREE_QCMPARG cmparg
 #endif
 		)
 {
@@ -132,7 +143,7 @@ BINTREE_FN int BINTREE_ID(query) (
 	if(lret || !uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, query);
+			cmp = BINTREE_QCMP(cmpfn, n, query);
 			if(cmp >= 0) {
 				if(!cmp)
 					ret = 1;
@@ -149,7 +160,7 @@ BINTREE_FN int BINTREE_ID(query) (
 	if(uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, query);
+			cmp = BINTREE_QCMP(cmpfn, n, query);
 			if(cmp > 0) {
 				c = n;
 				n = BINTREE_L(n);
@@ -174,8 +185,8 @@ BINTREE_FN int BINTREE_ID(find) (
 		BINTREE_DATA **lret,
 		BINTREE_DATA **uret,
 		BINTREE_ID(cmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_FCMPARG
+		, BINTREE_FCMPARG cmparg
 #endif
 		)
 {
@@ -188,7 +199,7 @@ BINTREE_FN int BINTREE_ID(find) (
 	if(lret || !uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, data);
+			cmp = BINTREE_FCMP(cmpfn, n, data);
 			if(cmp >= 0) {
 				if(!cmp)
 					ret = 1;
@@ -205,7 +216,7 @@ BINTREE_FN int BINTREE_ID(find) (
 	if(uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, data);
+			cmp = BINTREE_FCMP(cmpfn, n, data);
 			if(cmp > 0) {
 				c = n;
 				n = BINTREE_L(n);
@@ -678,8 +689,8 @@ BINTREE_FN void BINTREE_ID(sort)(
 #endif
 		BINTREE_DATA **root,
 		BINTREE_ID(cmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_FCMPARG
+		, BINTREE_FCMPARG cmparg
 #endif
 		)
 {
@@ -699,7 +710,7 @@ BINTREE_FN void BINTREE_ID(sort)(
 		/* perform upper search */
 		d = BINTREE_NULL;
 		for(n = *root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, s);
+			cmp = BINTREE_FCMP(cmpfn, n, s);
 			if(cmp > 0) {
 				d = n;
 				n = BINTREE_L(n);
@@ -723,8 +734,8 @@ BINTREE_FN int BINTREE_ID(sort_abortable)(
 		BINTREE_DATA **root,
 		BINTREE_ID(cmp_t) cmpfn,
 		int abortval /* if comparison function returns 'abortval', append remaining elements to new tree and return 'abortval'. */
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_FCMPARG
+		, BINTREE_FCMPARG cmparg
 #endif
 		)
 {
@@ -748,7 +759,7 @@ BINTREE_FN int BINTREE_ID(sort_abortable)(
 		/* perform upper search */
 		d = BINTREE_NULL;
 		for(n = *root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, s);
+			cmp = BINTREE_FCMP(cmpfn, n, s);
 			if(cmp == abortval) {
 				BINTREE_CALL(insert, root, NULL, s);
 				goto abort;
@@ -827,8 +838,8 @@ BINTREE_FN int BINTREE_ID(queryidx) (
 		BINTREE_INDEX *lret,
 		BINTREE_INDEX *uret,
 		BINTREE_ID(qcmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_QCMPARG
+		, BINTREE_QCMPARG cmparg
 #endif
 		)
 {
@@ -852,7 +863,7 @@ BINTREE_FN int BINTREE_ID(queryidx) (
 		c = s;
 		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
-			cmp = BINTREE_CMP(cmpfn, n, query);
+			cmp = BINTREE_QCMP(cmpfn, n, query);
 			if(cmp >= 0) {
 				if(!cmp)
 					ret = 1;
@@ -877,7 +888,7 @@ BINTREE_FN int BINTREE_ID(queryidx) (
 		c = s;
 		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
-			cmp = BINTREE_CMP(cmpfn, n, query);
+			cmp = BINTREE_QCMP(cmpfn, n, query);
 			if(cmp > 0) {
 				c = i;
 				n = BINTREE_L(n);
@@ -908,8 +919,8 @@ BINTREE_FN int BINTREE_ID(findidx) (
 		BINTREE_INDEX *lret,
 		BINTREE_INDEX *uret,
 		BINTREE_ID(qcmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_FCMPARG
+		, BINTREE_FCMPARG cmparg
 #endif
 		)
 {
@@ -933,7 +944,7 @@ BINTREE_FN int BINTREE_ID(findidx) (
 		c = s;
 		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
-			cmp = BINTREE_CMP(cmpfn, n, data);
+			cmp = BINTREE_FCMP(cmpfn, n, data);
 			if(cmp >= 0) {
 				if(!cmp)
 					ret = 1;
@@ -958,7 +969,7 @@ BINTREE_FN int BINTREE_ID(findidx) (
 		c = s;
 		i = BINTREE_CALL(size, BINTREE_L(root));
 		for(n = root;;) {
-			cmp = BINTREE_CMP(cmpfn, n, data);
+			cmp = BINTREE_FCMP(cmpfn, n, data);
 			if(cmp > 0) {
 				c = i;
 				n = BINTREE_L(n);
@@ -1019,8 +1030,8 @@ BINTREE_FN int BINTREE_ID(cquery) (
 		const BINTREE_DATA **lret,
 		const BINTREE_DATA **uret,
 		BINTREE_ID(qcmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_QCMPARG
+		, BINTREE_QCMPARG cmparg
 #endif
 		)
 {
@@ -1033,7 +1044,7 @@ BINTREE_FN int BINTREE_ID(cquery) (
 	if(lret || !uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, query);
+			cmp = BINTREE_QCMP(cmpfn, n, query);
 			if(cmp >= 0) {
 				if(!cmp)
 					ret = 1;
@@ -1050,7 +1061,7 @@ BINTREE_FN int BINTREE_ID(cquery) (
 	if(uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, query);
+			cmp = BINTREE_QCMP(cmpfn, n, query);
 			if(cmp > 0) {
 				c = n;
 				n = BINTREE_L(n);
@@ -1075,8 +1086,8 @@ BINTREE_FN int BINTREE_ID(cfind) (
 		const BINTREE_DATA **lret,
 		const BINTREE_DATA **uret,
 		BINTREE_ID(cmp_t) cmpfn
-#ifdef BINTREE_USE_CMPARG
-		, BINTREE_CMPARG cmparg
+#ifdef BINTREE_USE_FCMPARG
+		, BINTREE_FCMPARG cmparg
 #endif
 		)
 {
@@ -1089,7 +1100,7 @@ BINTREE_FN int BINTREE_ID(cfind) (
 	if(lret || !uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, data);
+			cmp = BINTREE_FCMP(cmpfn, n, data);
 			if(cmp >= 0) {
 				if(!cmp)
 					ret = 1;
@@ -1106,7 +1117,7 @@ BINTREE_FN int BINTREE_ID(cfind) (
 	if(uret) {
 		c = BINTREE_NULL;
 		for(n = root; n;) {
-			cmp = BINTREE_CMP(cmpfn, n, data);
+			cmp = BINTREE_FCMP(cmpfn, n, data);
 			if(cmp > 0) {
 				c = n;
 				n = BINTREE_L(n);
@@ -1215,7 +1226,12 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_USE_AVL
 #undef BINTREE_USE_BZERO
 #undef BINTREE_USE_MULTI
-#undef BINTREE_USE_CMPARG
+#undef BINTREE_USE_QCMPARG
+#undef BINTREE_USE_FCMPARG
+#undef BINTREE_QCMPARG
+#undef BINTREE_FCMPARG
+#undef BINTREE_QCMP
+#undef BINTREE_FCMP
 #undef BINTREE_CONFIG
 #undef BINTREE_MULTI
 #undef BINTREE_TONODE
@@ -1226,6 +1242,5 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_SIZE
 #undef BINTREE_FN
 #undef BINTREE_CALL
-#undef BINTREE_CMP
 #endif
 
