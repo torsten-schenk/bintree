@@ -117,8 +117,8 @@ BINTREE_FN int BINTREE_ID(memberof) (
 #ifdef BINTREE_USE_MULTI
 		BINTREE_MULTI multi,
 #endif
-		BINTREE_DATA *root,
-		BINTREE_DATA *n
+		const BINTREE_DATA *root,
+		const BINTREE_DATA *n
 )
 {
 	for(; n; n = BINTREE_P(n))
