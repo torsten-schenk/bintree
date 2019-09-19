@@ -590,6 +590,10 @@ BINTREE_FN void BINTREE_ID(remove)(
 		}
 	}
 
+#ifdef BINTREE_USE_BZERO
+	bzero(BINTREE_TONODE(x), sizeof(*BINTREE_TONODE(x)));
+#endif
+
 #ifdef BINTREE_USE_INDEX
 	for(c = zp; c; c = BINTREE_P(c))
 		BINTREE_SIZE(c)--;
