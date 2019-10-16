@@ -665,7 +665,18 @@ BINTREE_FN void BINTREE_ID(remove)(
 #endif
 }
 
-/* take one node from bintree. use case: destroy whole tree using a loop. note that no rebalancing/metadata updates will take place, since the purpose is to destroy the tree structure. */
+/* take one node from bintree. use case: destroy whole tree using a loop. note that no rebalancing/metadata updates will take place, since the purpose is to destroy the tree structure.
+ * decon() retrieves the elements from first to last in sequential order:
+ * 1. we descend to first element in remaining tree
+ * 2. this is the node n we return
+ * 3. a) n has right subtree r:
+ *       leftmost element in r is next element which must be returned
+ *       --> put r into n's position; parent of n is ordered after whole subtree r, so we ascend to n's parent after r is deconstructed
+ *       --> remember r, since in next iteration, we perform 1.
+ *    b) n has no right subtree (also no left subtree; therefore n is a leaf node):
+ *       parent p is next in-order element
+ *       --> remember p
+ *       --> in next iteration there will be no left child anymore */
 BINTREE_FN BINTREE_DATA *BINTREE_ID(decon)(
 #ifdef BINTREE_USE_MULTI
 		BINTREE_MULTI multi,
