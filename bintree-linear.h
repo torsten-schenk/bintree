@@ -8,7 +8,7 @@ static inline int binsearch(
 		const void *search,
 		size_t *lret,
 		size_t *uret,
-		int (*cmpfn)(const void *a, const void *b))
+		int (*cmpfn)(const void *a, const void *b)) /* 'a' is always an element in the 'base' array; 'b' is always the 'search' parameter */
 {
 	size_t l;
 	size_t m;
