@@ -941,7 +941,7 @@ BINTREE_FN int BINTREE_ID(findidx) (
 		BINTREE_DATA *data,
 		BINTREE_INDEX *lret,
 		BINTREE_INDEX *uret,
-		BINTREE_ID(qcmp_t) cmpfn
+		BINTREE_ID(cmp_t) cmpfn
 #ifdef BINTREE_USE_FCMPARG
 		, BINTREE_FCMPARG cmparg
 #endif
