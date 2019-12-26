@@ -69,7 +69,7 @@ typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_SUM) != 0
 #define BINTREE_USE_SUM
 #define BINTREE_SUM BINTREE_SCONCAT2(BINTREE_CONFIG, _SUM)
-#define BINTREE_VALUE(X) BINTREE_SCONCAT2(BINTREE_CONFIG, _VALUE)(X)
+#define BINTREE_VALUE(X) (X->BINTREE_SCONCAT2(BINTREE_CONFIG, _VALUE))
 #endif
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_AVL) != 0
 #define BINTREE_USE_AVL
@@ -1175,6 +1175,96 @@ BINTREE_FN BINTREE_SUM BINTREE_ID(postsum)(
 		}
 	}
 	return sum;
+}
+
+BINTREE_FN BINTREE_SUM BINTREE_ID(sum)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *root)
+{
+	if(root)
+		return BINTREE_CUMUL(root);
+	else
+		return 0;
+}
+
+/* assumes that values at all nodes are >= 0
+ * return:
+ * - off == 0: return true
+ *   - lret: NULL
+ *   - uret: rightmost node which holds presum <= off
+ * - off == total sum: return true
+ *   - lret: leftmost node which holds presum+value == off (i.e. all following nodes have a value of 0)
+ *   - uret: NULL
+ * - off < total sum: return true
+ *   - lret: leftmost node which holds presum+value <= off
+ *   - uret: rightmost node which holds presum <= off
+ * - off > total sum: return false
+ * loff and uoff are only valid if lret/uret is non-NULL
+ * if a chunk buffer is controlled by the tree, one could think of l begin the position to "write to" and u being the position to "read from" */
+BINTREE_FN int BINTREE_ID(findoff)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *root,
+		BINTREE_SUM off,
+		BINTREE_DATA **lret,
+		BINTREE_SUM *loff,
+		BINTREE_DATA **uret,
+		BINTREE_SUM *uoff)
+{
+	BINTREE_DATA *n;
+	BINTREE_SUM lsum;
+
+	if(lret || !uret) {
+		BINTREE_SUM o = off;
+		n = root;
+		while(n) {
+			if(BINTREE_L(n))
+				lsum = BINTREE_CUMUL(BINTREE_L(n));
+			else
+				lsum = 0;
+
+			if(o <= lsum)
+				n = BINTREE_L(n);
+			else if(o > lsum + BINTREE_VALUE(n)) {
+				o -= lsum + BINTREE_VALUE(n);
+				n = BINTREE_R(n);
+			}
+			else {
+				if(loff)
+					*loff = o - lsum;
+				break;
+			}
+		}
+		if(lret)
+			*lret = n;
+	}
+	if(uret) {
+		BINTREE_SUM o = off;
+		n = root;
+		while(n) {
+			if(BINTREE_L(n))
+				lsum = BINTREE_CUMUL(BINTREE_L(n));
+			else
+				lsum = 0;
+
+			if(o < lsum)
+				n = BINTREE_L(n);
+			else if(o >= lsum + BINTREE_VALUE(n)) {
+				o -= lsum + BINTREE_VALUE(n);
+				n = BINTREE_R(n);
+			}
+			else {
+				if(uoff)
+					*uoff = o - lsum;
+				break;
+			}
+		}
+		*uret = n;
+	}
+	return !off || (root && off <= BINTREE_CUMUL(root));
 }
 #endif
 

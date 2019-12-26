@@ -14,7 +14,7 @@ typedef struct mydata mydata_t;
 #define MYDATA_USE_AVL 1
 #define MYDATA_USE_BZERO 1
 #define MYDATA_SUM size_t
-#define MYDATA_VALUE getvalue
+#define MYDATA_VALUE value
 
 struct mydata {
 #define BINTREE_CONFIG MYDATA
@@ -22,12 +22,6 @@ struct mydata {
 	size_t value;
 	int inserted;
 };
-
-static inline size_t getvalue(
-		const mydata_t *data)
-{
-	return data->value;
-}
 
 #define BINTREE_CONFIG MYDATA
 #include <bintree-impl.h>
