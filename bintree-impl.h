@@ -16,6 +16,7 @@
 #define BINTREE_P(X) (X->BINTREE_FIELD[multi].p)
 #define BINTREE_B(X) (X->BINTREE_FIELD[multi].b)
 #define BINTREE_SIZE(X) (X->BINTREE_FIELD[multi].size)
+#define BINTREE_CUMUL(X) (X->BINTREE_FIELD[multi].cumul)
 #define BINTREE_CALL(X, ...) BINTREE_ID(X)(multi, __VA_ARGS__)
 #else
 #define BINTREE_TONODE(X) (&(X)->BINTREE_FIELD)
@@ -24,6 +25,7 @@
 #define BINTREE_P(X) (X->BINTREE_FIELD.p)
 #define BINTREE_B(X) (X->BINTREE_FIELD.b)
 #define BINTREE_SIZE(X) (X->BINTREE_FIELD.size)
+#define BINTREE_CUMUL(X) (X->BINTREE_FIELD.cumul)
 #define BINTREE_CALL(X, ...) BINTREE_ID(X)(__VA_ARGS__)
 #endif
 
@@ -63,6 +65,11 @@ typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_INDEX) != 0
 #define BINTREE_USE_INDEX
 #define BINTREE_INDEX BINTREE_SCONCAT2(BINTREE_CONFIG, _INDEX)
+#endif
+#if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_SUM) != 0
+#define BINTREE_USE_SUM
+#define BINTREE_SUM BINTREE_SCONCAT2(BINTREE_CONFIG, _SUM)
+#define BINTREE_VALUE(X) BINTREE_SCONCAT2(BINTREE_CONFIG, _VALUE)(X)
 #endif
 #if BINTREE_SCONCAT2(BINTREE_CONFIG, _USE_AVL) != 0
 #define BINTREE_USE_AVL
@@ -320,9 +327,15 @@ BINTREE_FN void BINTREE_ID(ror)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-	BINTREE_INDEX sl;
-	BINTREE_INDEX sm;
-	BINTREE_INDEX sr;
+	BINTREE_INDEX sl; /* size of subtree rooted in n->l */
+	BINTREE_INDEX sm; /* size of subtree rooted in n->r */
+	BINTREE_INDEX sr; /* size of subtree rooted in p->r */
+#endif
+
+#ifdef BINTREE_USE_SUM
+	BINTREE_SUM cl; /* cumulative sum of subtree rooted in n->l */
+	BINTREE_SUM cm; /* cumulative sum of subtree rooted in n->r */
+	BINTREE_SUM cr; /* cumulative sum of subtree rooted in p->r */
 #endif
 
 #ifdef BINTREE_USE_INDEX
@@ -335,6 +348,18 @@ BINTREE_FN void BINTREE_ID(ror)(
 	sr = BINTREE_SIZE(p) - sl - sm - 2;
 	BINTREE_SIZE(n) = sl + sm + sr + 2;
 	BINTREE_SIZE(p) = sm + sr + 1; 
+#endif
+
+#ifdef BINTREE_USE_SUM
+	/* calculate sum of the three subtrees and set the new sizue for p and n */
+	if(BINTREE_L(n))
+		cl = BINTREE_CUMUL(BINTREE_L(n));
+	else
+		cl = 0;
+	cm = BINTREE_CUMUL(n) - cl - BINTREE_VALUE(n);
+	cr = BINTREE_CUMUL(p) - cl - cm - BINTREE_VALUE(n) - BINTREE_VALUE(p);
+	BINTREE_CUMUL(n) = cl + cm + cr + BINTREE_VALUE(n) + BINTREE_VALUE(p);
+	BINTREE_CUMUL(p) = cm + cr + BINTREE_VALUE(p); 
 #endif
 
 #ifdef BINTREE_USE_AVL
@@ -380,9 +405,15 @@ BINTREE_FN void BINTREE_ID(rol)(
 #endif
 
 #ifdef BINTREE_USE_INDEX
-	BINTREE_INDEX sl;
-	BINTREE_INDEX sm;
-	BINTREE_INDEX sr;
+	BINTREE_INDEX sl; /* size of subtree rooted in p->l */
+	BINTREE_INDEX sm; /* size of subtree rooted in n->l */
+	BINTREE_INDEX sr; /* size of subtree rooted in n->r */
+#endif
+
+#ifdef BINTREE_USE_SUM
+	BINTREE_SUM cl;
+	BINTREE_SUM cm;
+	BINTREE_SUM cr;
 #endif
 
 #ifdef BINTREE_USE_INDEX
@@ -391,10 +422,21 @@ BINTREE_FN void BINTREE_ID(rol)(
 		sr = BINTREE_SIZE(BINTREE_R(n));
 	else
 		sr = 0;
-	sm = BINTREE_SIZE(n) - sr - 1;
+	sm = BINTREE_SIZE(n) - sr - 1; /* TODO is this equal to BINTREE_SIZE(BINTREE_L(n))? (see also comment and other rotation) */
 	sl = BINTREE_SIZE(p) - sm - sr - 2;
 	BINTREE_SIZE(n) = sl + sm + sr + 2;
 	BINTREE_SIZE(p) = sl + sm + 1; 
+#endif
+
+#ifdef BINTREE_USE_SUM
+	if(BINTREE_R(n))
+		cr = BINTREE_CUMUL(BINTREE_R(n));
+	else
+		cr = 0;
+	cm = BINTREE_CUMUL(n) - cr - BINTREE_VALUE(n);
+	cl = BINTREE_CUMUL(p) - cm - cr - BINTREE_VALUE(n) - BINTREE_VALUE(p);
+	BINTREE_CUMUL(n) = cl + cm + cr + BINTREE_VALUE(n) + BINTREE_VALUE(p);
+	BINTREE_CUMUL(p) = cl + cm + BINTREE_VALUE(p); 
 #endif
 
 #ifdef BINTREE_USE_AVL
@@ -461,6 +503,11 @@ BINTREE_FN void BINTREE_ID(insert)(
 		BINTREE_SIZE(p)++;
 #endif
 
+#ifdef BINTREE_USE_SUM
+	for(p = n; p; p = BINTREE_P(p))
+		BINTREE_CUMUL(p) += BINTREE_VALUE(n);
+#endif
+
 #ifdef BINTREE_USE_AVL
 	/* retracing after insertion */
 	for(p = BINTREE_P(n); p; n = p, p = BINTREE_P(n)) {
@@ -521,7 +568,7 @@ BINTREE_FN void BINTREE_ID(remove)(
 	if(BINTREE_L(x) && BINTREE_R(x)) {
 		/* find predecessor of x */
 		y = BINTREE_L(x);
-		if(BINTREE_R(y)) {
+		if(BINTREE_R(y)) { /* case 1 */
 			/* descend to rightmost node */
 			for(; BINTREE_R(y); y = BINTREE_R(y));
 			zp = BINTREE_P(y);
@@ -535,20 +582,27 @@ BINTREE_FN void BINTREE_ID(remove)(
 			BINTREE_L(y) = BINTREE_L(x);
 			BINTREE_P(BINTREE_L(y)) = y;
 		}
-		else {
+		else { /* case 2 */
 			zp = y;
 #ifdef BINTREE_USE_AVL
 			zr = 0;
 #endif
 		}
-		BINTREE_P(y) = BINTREE_P(x);
-		BINTREE_R(y) = BINTREE_R(x);
+		/* update auxiliary data of y */
 #ifdef BINTREE_USE_AVL
 		BINTREE_B(y) = BINTREE_B(x);
 #endif
 #ifdef BINTREE_USE_INDEX
 		BINTREE_SIZE(y) = BINTREE_SIZE(x);
 #endif
+#ifdef BINTREE_USE_SUM
+		BINTREE_CUMUL(y) = BINTREE_CUMUL(x);
+		for(c = zp; c != y; c = BINTREE_P(c))
+			BINTREE_CUMUL(c) -= BINTREE_VALUE(y);
+#endif
+		/* update tree pointers for y movement */
+		BINTREE_P(y) = BINTREE_P(x);
+		BINTREE_R(y) = BINTREE_R(x);
 		if(BINTREE_R(y))
 			BINTREE_P(BINTREE_R(y)) = y;
 		if(BINTREE_P(y)) {
@@ -562,30 +616,33 @@ BINTREE_FN void BINTREE_ID(remove)(
 	}
 	else {
 		zp = BINTREE_P(x);
+#ifdef BINTREE_USE_SUM
+		y = zp;
+#endif
 #ifdef BINTREE_USE_AVL
 		if(zp && BINTREE_L(zp) == x)
 			zr = 0;
 #endif
 		if(!BINTREE_P(x)) { /* x was root node, set new root node */
-			if(BINTREE_L(x)) {
+			if(BINTREE_L(x)) { /* remove case 3, ZP is root */
 				*root = BINTREE_L(x);
 				BINTREE_P(BINTREE_L(x)) = BINTREE_NULL;
 			}
-			else if(BINTREE_R(x)) {
+			else if(BINTREE_R(x)) { /* remove case 4, ZP is root */
 				*root = BINTREE_R(x);
 				BINTREE_P(BINTREE_R(x)) = BINTREE_NULL;
 			}
 			else
 				*root = BINTREE_NULL;
 		}
-		else if(BINTREE_L(x)) { /* x has only a left subtree and is not root, attach subtree to parent at x's position */
+		else if(BINTREE_L(x)) { /* remove case 3: x has only a left subtree and is not root, attach subtree to parent at x's position */
 			if(BINTREE_L(BINTREE_P(x)) == x)
 				BINTREE_L(BINTREE_P(x)) = BINTREE_L(x);
 			else
 				BINTREE_R(BINTREE_P(x)) = BINTREE_L(x);
 			BINTREE_P(BINTREE_L(x)) = BINTREE_P(x);
 		}
-		else if(BINTREE_R(x)) { /* x has only a right subtree and is not root, attach subtree to parent at x's position */
+		else if(BINTREE_R(x)) { /* x remove case 4: has only a right subtree and is not root, attach subtree to parent at x's position */
 			if(BINTREE_L(BINTREE_P(x)) == x)
 				BINTREE_L(BINTREE_P(x)) = BINTREE_R(x);
 			else
@@ -600,13 +657,16 @@ BINTREE_FN void BINTREE_ID(remove)(
 		}
 	}
 
-#ifdef BINTREE_USE_BZERO
-	bzero(BINTREE_TONODE(x), sizeof(*BINTREE_TONODE(x)));
-#endif
-
 #ifdef BINTREE_USE_INDEX
 	for(c = zp; c; c = BINTREE_P(c))
 		BINTREE_SIZE(c)--;
+#endif
+#ifdef BINTREE_USE_SUM
+	for(c = y; c; c = BINTREE_P(c))
+		BINTREE_CUMUL(c) -= BINTREE_VALUE(x);
+#endif
+#ifdef BINTREE_USE_BZERO
+	bzero(BINTREE_TONODE(x), sizeof(*BINTREE_TONODE(x)));
 #endif
 
 #ifdef BINTREE_USE_AVL
@@ -617,53 +677,53 @@ BINTREE_FN void BINTREE_ID(remove)(
 	while(zp) {
 		/* zp is the root of the subtree to be updated. after update, this must still hold. */
 		if(zr) {
-			if(!BINTREE_B(zp)) { /* case 1 */
+			if(!BINTREE_B(zp)) { /* avl case 1 */
 				BINTREE_B(zp)++;
 				break; /* no further updates required */
 			}
 			else if(BINTREE_B(zp) > 0) {
 				c = BINTREE_L(zp);
 				BINTREE_B(zp)++;
-				if(!BINTREE_B(c)) { /* case 2 */
+				if(!BINTREE_B(c)) { /* avl case 2 */
 					BINTREE_CALL(ror, root, c);
 					break; /* no further updates required */
 				}
-				else if(BINTREE_B(c) < 0) { /* case 3 */
+				else if(BINTREE_B(c) < 0) { /* avl case 3 */
 					zp = BINTREE_R(c);
 					BINTREE_CALL(rol, root, zp);
 					BINTREE_CALL(ror, root, zp);
 				}
-				else { /* case 4 */
+				else { /* avl case 4 */
 					zp = c;
 					BINTREE_CALL(ror, root, zp);
 				}
 			}
-			else /* case 5 */
+			else /* avl case 5 */
 				BINTREE_B(zp)++;
 		}
 		else {
-			if(!BINTREE_B(zp)) { /* case 1 */
+			if(!BINTREE_B(zp)) { /* avl case 1 */
 				BINTREE_B(zp)--;
 				break; /* no further updates required */
 			}
 			else if(BINTREE_B(zp) < 0) {
 				c = BINTREE_R(zp);
 				BINTREE_B(zp)--;
-				if(!BINTREE_B(c)) { /* case 2 */
+				if(!BINTREE_B(c)) { /* avl case 2 */
 					BINTREE_CALL(rol, root, c);
 					break; /* no further updates required */
 				}
-				else if(BINTREE_B(c) > 0) { /* case 3 */
+				else if(BINTREE_B(c) > 0) { /* avl case 3 */
 					zp = BINTREE_L(c);
 					BINTREE_CALL(ror, root, zp);
 					BINTREE_CALL(rol, root, zp);
 				}
-				else { /* case 4 */
+				else { /* avl case 4 */
 					zp = c;
 					BINTREE_CALL(rol, root, zp);
 				}
 			}
-			else
+			else /* avl case 5 */
 				BINTREE_B(zp)--;
 		}
 		if(BINTREE_P(zp) && zp == BINTREE_R(BINTREE_P(zp)))
@@ -1051,6 +1111,74 @@ BINTREE_FN BINTREE_INDEX BINTREE_ID(index)(
 #endif
 #endif
 
+#ifdef BINTREE_USE_SUM
+BINTREE_FN void BINTREE_ID(update)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *n)
+{
+	BINTREE_SUM d = BINTREE_CUMUL(n) - BINTREE_VALUE(n);
+	/* old value of n: cumul(n) - cumul(l) - cumul(r) */
+	if(BINTREE_L(n))
+		d -= BINTREE_CUMUL(BINTREE_L(n));
+	if(BINTREE_R(n))
+		d -= BINTREE_CUMUL(BINTREE_R(n));
+	/* d now contains old_value - new_value */
+	for(BINTREE_DATA *c = n; c; c = BINTREE_P(c))
+		BINTREE_CUMUL(c) -= d;
+}
+
+BINTREE_FN BINTREE_SUM BINTREE_ID(presum)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *n)
+{
+	const BINTREE_DATA *c;
+	BINTREE_SUM sum;
+	if(BINTREE_L(n))
+		sum = BINTREE_CUMUL(BINTREE_L(n));
+	else
+		sum = 0;
+	while(BINTREE_P(n)) {
+		c = n;
+		n = BINTREE_P(n);
+		if(BINTREE_R(n) == c) {
+			sum += BINTREE_VALUE(n);
+			if(BINTREE_L(n))
+				sum += BINTREE_CUMUL(BINTREE_L(n));
+		}
+	}
+	return sum;
+}
+
+BINTREE_FN BINTREE_SUM BINTREE_ID(postsum)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *n)
+{
+	const BINTREE_DATA *c;
+	BINTREE_SUM sum;
+	if(BINTREE_R(n))
+		sum = BINTREE_CUMUL(BINTREE_R(n));
+	else
+		sum = 0;
+	while(BINTREE_P(n)) {
+		c = n;
+		n = BINTREE_P(n);
+		if(BINTREE_L(n) == c) {
+			sum += BINTREE_VALUE(n);
+			if(BINTREE_R(n))
+				sum += BINTREE_CUMUL(BINTREE_R(n));
+		}
+	}
+	return sum;
+}
+#endif
+
+
 /* CONST IMPLEMENTATION */
 
 /* NOTE: query() and find() are very similar, the only difference is the cmp function for convenience and type safety */
@@ -1253,9 +1381,11 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_PREFIX
 #undef BINTREE_FIELD
 #undef BINTREE_INDEX
+#undef BINTREE_SUM
 #undef BINTREE_CMPARG
 #undef BINTREE_USE_PARENT
 #undef BINTREE_USE_INDEX
+#undef BINTREE_USE_SUM
 #undef BINTREE_USE_AVL
 #undef BINTREE_USE_BZERO
 #undef BINTREE_USE_MULTI
@@ -1273,6 +1403,8 @@ BINTREE_FN const BINTREE_DATA *BINTREE_ID(cat)(
 #undef BINTREE_P
 #undef BINTREE_B
 #undef BINTREE_SIZE
+#undef BINTREE_CUMUL
+#undef BINTREE_VALUE
 #undef BINTREE_FN
 #undef BINTREE_CALL
 #endif
