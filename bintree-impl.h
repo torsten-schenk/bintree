@@ -1191,14 +1191,11 @@ BINTREE_FN BINTREE_SUM BINTREE_ID(sum)(
 
 /* assumes that values at all nodes are >= 0
  * return:
- * - off == 0: return true
- *   - lret: NULL
- *   - uret: rightmost node which holds presum <= off
  * - off == total sum: return true
  *   - lret: leftmost node which holds presum+value == off (i.e. all following nodes have a value of 0)
  *   - uret: NULL
  * - off < total sum: return true
- *   - lret: leftmost node which holds presum+value <= off
+ *   - lret: leftmost node which holds presum+value >= off
  *   - uret: rightmost node which holds presum <= off
  * - off > total sum: return false
  * loff and uoff are only valid if lret/uret is non-NULL
@@ -1226,7 +1223,7 @@ BINTREE_FN int BINTREE_ID(findoff)(
 			else
 				lsum = 0;
 
-			if(o <= lsum)
+			if(o <= lsum && BINTREE_L(n))
 				n = BINTREE_L(n);
 			else if(o > lsum + BINTREE_VALUE(n)) {
 				o -= lsum + BINTREE_VALUE(n);
