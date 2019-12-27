@@ -1129,11 +1129,17 @@ BINTREE_FN void BINTREE_ID(update)(
 		BINTREE_CUMUL(c) -= d;
 }
 
-BINTREE_FN BINTREE_SUM BINTREE_ID(presum)(
+/* returns:
+ * - pre: sum of all element values before 'n'
+ * - post: sum of all elements values after 'n' and 'n' itself
+ * */
+BINTREE_FN void BINTREE_ID(sum)(
 #ifdef BINTREE_USE_MULTI
 		BINTREE_MULTI multi,
 #endif
-		BINTREE_DATA *n)
+		BINTREE_DATA *n,
+		BINTREE_SUM *pre,
+		BINTREE_SUM *post)
 {
 	const BINTREE_DATA *c;
 	BINTREE_SUM sum;
@@ -1150,43 +1156,10 @@ BINTREE_FN BINTREE_SUM BINTREE_ID(presum)(
 				sum += BINTREE_CUMUL(BINTREE_L(n));
 		}
 	}
-	return sum;
-}
-
-BINTREE_FN BINTREE_SUM BINTREE_ID(postsum)(
-#ifdef BINTREE_USE_MULTI
-		BINTREE_MULTI multi,
-#endif
-		BINTREE_DATA *n)
-{
-	const BINTREE_DATA *c;
-	BINTREE_SUM sum;
-	if(BINTREE_R(n))
-		sum = BINTREE_CUMUL(BINTREE_R(n));
-	else
-		sum = 0;
-	while(BINTREE_P(n)) {
-		c = n;
-		n = BINTREE_P(n);
-		if(BINTREE_L(n) == c) {
-			sum += BINTREE_VALUE(n);
-			if(BINTREE_R(n))
-				sum += BINTREE_CUMUL(BINTREE_R(n));
-		}
-	}
-	return sum;
-}
-
-BINTREE_FN BINTREE_SUM BINTREE_ID(sum)(
-#ifdef BINTREE_USE_MULTI
-		BINTREE_MULTI multi,
-#endif
-		BINTREE_DATA *root)
-{
-	if(root)
-		return BINTREE_CUMUL(root);
-	else
-		return 0;
+	if(pre)
+		*pre = sum;
+	if(post)
+		*post = BINTREE_CUMUL(n) - sum;
 }
 
 /* assumes that values at all nodes are >= 0

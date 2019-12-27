@@ -54,10 +54,52 @@ static mydata_t *getrnd(
 	return data + v;
 }
 
+static void tgf_node(
+		FILE *out,
+		const mydata_t *n,
+		size_t *id)
+{
+	if(n) {
+		fprintf(out, "%zu %zu/%zu\n", ++*id, n->value, n->node.cumul);
+		tgf_node(out, n->node.l, id);
+		tgf_node(out, n->node.r, id);
+	}
+}
+
+static void tgf_link(
+		FILE *out,
+		const mydata_t *n,
+		size_t *id)
+{
+	if(n) {
+		size_t src = ++*id;
+		if(n->node.l)
+			fprintf(out, "%zu %zu\n", src, *id + 1);
+		tgf_link(out, n->node.l, id);
+		if(n->node.r)
+			fprintf(out, "%zu %zu\n", src, *id + 1);
+		tgf_link(out, n->node.r, id);
+	}
+}
+
+static void totgf(
+		FILE *out,
+		mydata_t *root)
+{
+	size_t id;
+	id = 0;
+	tgf_node(out, root, &id);
+	fprintf(out, "#\n");
+	id = 0;
+	tgf_link(out, root, &id);
+}
+
 int main()
 {
 	size_t total = 0;
 	size_t pre = 0;
+	size_t cpre;
+	size_t cpost;
 	mydata_t *root = NULL;
 	for(size_t i = 0; i < N; i++) {
 		data[i].value = i;
@@ -75,12 +117,16 @@ int main()
 		mydata_insert(&root, piv, cur);
 	}
 
+//	totgf(stdout, root);
+//	return 0;
+
 	/* check, if sums are ok after insertion */
 	for(size_t i = 0; i < N; i++) {
-//		printf("SUM: %d %zu==%zu %zu==%zu\n", i, mydata_presum(data + i), i * (i - 1) / 2, mydata_postsum(data + i), (i + N) * (N - i - 1) / 2);
-		assert(mydata_presum(data + i) == i * (i - 1) / 2);
+		mydata_sum(data + i, &cpre, &cpost);
+//		printf("SUM: %d %zu==%zu %zu==%zu\n", i, cpre, i * (i - 1) / 2, cpost, (i + N) * (N - i - 1) / 2);
+		assert(cpre == i * (i - 1) / 2);
 //		printf("CHECK: %zu\n", (i + N) * (N - i - 1) / 2);
-		assert(mydata_postsum(data + i) == (i + N) * (N - i - 1) / 2);
+		assert(cpost == (i + N - 1) * (N - i) / 2);
 	}
 
 	/* randomly remove elements */
@@ -95,9 +141,10 @@ int main()
 	for(size_t i = 0; i < N; i++) {
 		mydata_t *cur = data + i;
 		if(cur->inserted) {
-			assert(mydata_presum(cur) == pre);
-			assert(mydata_postsum(cur) == total - pre - cur->value);
-			printf("SUM: %d %zu==%zu %zu==%zu\n", i, mydata_presum(data + i), pre, mydata_postsum(data + i), total - pre - cur->value);
+			mydata_sum(cur, &cpre, &cpost);
+			assert(cpre == pre);
+			assert(cpost == total - pre);
+//			printf("SUM: %d %zu==%zu %zu==%zu\n", i, mydata_presum(data + i), pre, mydata_postsum(data + i), total - pre - cur->value);
 			pre += cur->value;
 		}
 	}
