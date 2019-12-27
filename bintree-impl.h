@@ -1191,12 +1191,12 @@ BINTREE_FN BINTREE_SUM BINTREE_ID(sum)(
 
 /* assumes that values at all nodes are >= 0
  * return:
- * - off == total sum: return true
- *   - lret: leftmost node which holds presum+value == off (i.e. all following nodes have a value of 0)
- *   - uret: NULL
- * - off < total sum: return false
+ * - off < total sum: return true
  *   - lret: leftmost node which holds presum+value >= off
  *   - uret: rightmost node which holds presum <= off
+ * - off == total sum: return false
+ *   - lret: leftmost node which holds presum+value == off (i.e. all following nodes have a value of 0)
+ *   - uret: NULL
  * - off > total sum: return false
  *   - lret: NULL
  *   - uret: NULL
