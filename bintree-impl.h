@@ -1162,6 +1162,18 @@ BINTREE_FN void BINTREE_ID(sum)(
 		*post = BINTREE_CUMUL(n) - sum;
 }
 
+BINTREE_FN BINTREE_SUM BINTREE_ID(total)(
+#ifdef BINTREE_USE_MULTI
+		BINTREE_MULTI multi,
+#endif
+		BINTREE_DATA *root)
+{
+	if(root)
+		return BINTREE_CUMUL(root);
+	else
+		return 0;
+}
+
 /* assumes that values at all nodes are >= 0
  * return:
  * - off < total sum:
