@@ -1131,8 +1131,7 @@ BINTREE_FN void BINTREE_ID(update)(
 
 /* returns:
  * - pre: sum of all element values before 'n'
- * - post: sum of all elements values after 'n' and 'n' itself
- * */
+ * - post: sum of all elements values after 'n' */
 BINTREE_FN void BINTREE_ID(sum)(
 #ifdef BINTREE_USE_MULTI
 		BINTREE_MULTI multi,
@@ -1141,6 +1140,7 @@ BINTREE_FN void BINTREE_ID(sum)(
 		BINTREE_SUM *pre,
 		BINTREE_SUM *post)
 {
+	const BINTREE_DATA *org = n;
 	const BINTREE_DATA *c;
 	BINTREE_SUM sum;
 	if(BINTREE_L(n))
@@ -1159,7 +1159,7 @@ BINTREE_FN void BINTREE_ID(sum)(
 	if(pre)
 		*pre = sum;
 	if(post)
-		*post = BINTREE_CUMUL(n) - sum;
+		*post = BINTREE_CUMUL(n) - sum - BINTREE_VALUE(org);
 }
 
 BINTREE_FN BINTREE_SUM BINTREE_ID(total)(

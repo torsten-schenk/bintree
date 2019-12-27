@@ -126,7 +126,7 @@ int main()
 //		printf("SUM: %d %zu==%zu %zu==%zu\n", i, cpre, i * (i - 1) / 2, cpost, (i + N) * (N - i - 1) / 2);
 		assert(cpre == i * (i - 1) / 2);
 //		printf("CHECK: %zu\n", (i + N) * (N - i - 1) / 2);
-		assert(cpost == (i + N - 1) * (N - i) / 2);
+		assert(cpost == (i + N) * (N - i - 1) / 2);
 	}
 
 	/* randomly remove elements */
@@ -143,7 +143,7 @@ int main()
 		if(cur->inserted) {
 			mydata_sum(cur, &cpre, &cpost);
 			assert(cpre == pre);
-			assert(cpost == total - pre);
+			assert(cpost == total - pre - cur->value);
 //			printf("SUM: %d %zu==%zu %zu==%zu\n", i, mydata_presum(data + i), pre, mydata_postsum(data + i), total - pre - cur->value);
 			pre += cur->value;
 		}
