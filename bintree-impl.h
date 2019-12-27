@@ -1191,18 +1191,18 @@ BINTREE_FN BINTREE_SUM BINTREE_ID(sum)(
 
 /* assumes that values at all nodes are >= 0
  * return:
- * - off < total sum: return true
+ * - off < total sum:
  *   - lret: leftmost node which holds presum+value >= off
  *   - uret: rightmost node which holds presum <= off
- * - off == total sum: return false
+ * - off == total sum:
  *   - lret: leftmost node which holds presum+value == off (i.e. all following nodes have a value of 0)
  *   - uret: NULL
- * - off > total sum: return false
+ * - off > total sum:
  *   - lret: NULL
  *   - uret: NULL
  * loff/uoff are only valid if lret/uret is non-NULL
  * if a chunk buffer is controlled by the tree, one could think of l begin the position to "write to" and u being the position to "read from" */
-BINTREE_FN int BINTREE_ID(findoff)(
+BINTREE_FN void BINTREE_ID(findoff)(
 #ifdef BINTREE_USE_MULTI
 		BINTREE_MULTI multi,
 #endif
@@ -1215,9 +1215,10 @@ BINTREE_FN int BINTREE_ID(findoff)(
 {
 	BINTREE_DATA *n;
 	BINTREE_SUM lsum;
+	BINTREE_SUM o;
 
 	if(lret || !uret) {
-		BINTREE_SUM o = off;
+		o = off;
 		n = root;
 		while(n) {
 			if(BINTREE_L(n))
@@ -1241,7 +1242,7 @@ BINTREE_FN int BINTREE_ID(findoff)(
 			*lret = n;
 	}
 	if(uret) {
-		BINTREE_SUM o = off;
+		o = off;
 		n = root;
 		while(n) {
 			if(BINTREE_L(n))
@@ -1263,7 +1264,6 @@ BINTREE_FN int BINTREE_ID(findoff)(
 		}
 		*uret = n;
 	}
-	return !off || (root && off < BINTREE_CUMUL(root));
 }
 #endif
 

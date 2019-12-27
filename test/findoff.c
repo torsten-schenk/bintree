@@ -1,4 +1,3 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -27,7 +26,6 @@ struct mydata {
 
 struct test {
 	size_t off;
-	bool ret;
 	const mydata_t *l;
 	size_t loff;
 	const mydata_t *u;
@@ -47,11 +45,11 @@ static mydata_t data_a[] = {
 };
 
 static const test_t tests_a[] = {
- { 0, true, data_a + 0, 0, data_a + 1, 0 },
- { 1, true, data_a + 1, 1, data_a + 3, 0 },
- { 2, true, data_a + 3, 1, data_a + 3, 1 },
- { 3, false, data_a + 3, 2, NULL, 0 },
- { 4, false, NULL, 0, NULL, 0 },
+ { 0, data_a + 0, 0, data_a + 1, 0 },
+ { 1, data_a + 1, 1, data_a + 3, 0 },
+ { 2, data_a + 3, 1, data_a + 3, 1 },
+ { 3, data_a + 3, 2, NULL, 0 },
+ { 4, NULL, 0, NULL, 0 },
 };
 
 static mydata_t data_b[] = {
@@ -61,8 +59,8 @@ static mydata_t data_b[] = {
 };
 
 static const test_t tests_b[] = {
- { 0, true, data_b + 0, 0, data_b + 0, 0 },
- { 1, true, data_b + 0, 1, data_b + 1, 0 },
+ { 0, data_b + 0, 0, data_b + 0, 0 },
+ { 1, data_b + 0, 1, data_b + 1, 0 },
 };
 
 static void run(
@@ -78,8 +76,7 @@ static void run(
 	for(size_t i = 0; i < ntest; i++) {
 		mydata_t *l, *u;
 		size_t loff, uoff;
-		int ret = mydata_findoff(root, tests[i].off, &l, &loff, &u, &uoff);
-		assert(!ret == !tests[i].ret);
+		mydata_findoff(root, tests[i].off, &l, &loff, &u, &uoff);
 		assert(l == tests[i].l);
 		if(tests[i].l) {
 			assert(loff == tests[i].loff);
