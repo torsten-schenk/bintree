@@ -50,7 +50,7 @@ static const test_t tests_a[] = {
  { 0, true, data_a + 0, 0, data_a + 1, 0 },
  { 1, true, data_a + 1, 1, data_a + 3, 0 },
  { 2, true, data_a + 3, 1, data_a + 3, 1 },
- { 3, true, data_a + 3, 2, NULL, 0 },
+ { 3, false, data_a + 3, 2, NULL, 0 },
  { 4, false, NULL, 0, NULL, 0 },
 };
 
