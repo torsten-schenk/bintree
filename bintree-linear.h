@@ -21,7 +21,7 @@ static inline int binsearch(
 	if(lret || !uret) {
 		l = 0;
 		u = nitems;
-		cand = 0;
+		cand = nitems;
 		while(l < u) {
 			m = l + (u - l) / 2;
 			cur = (const char*)base + m * size;
