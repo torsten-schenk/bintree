@@ -57,8 +57,7 @@ static inline int binsearch(
 				l = m + 1;
 			}
 		}
-		if(uret)
-			*uret = cand;
+		*uret = cand;
 	}
 	return ret;
 }
