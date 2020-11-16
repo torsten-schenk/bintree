@@ -62,6 +62,47 @@ static inline int binsearch(
 	return ret;
 }
 
+static inline int linsearch(
+		const void *base,
+		size_t nitems,
+		size_t size,
+		const void *search,
+		size_t *lret,
+		size_t *uret,
+		int (*cmpfn)(const void *a, const void *b)) /* 'a' is always an element in the 'base' array; 'b' is always the 'search' parameter */
+{
+	int ret = 0;
+	int cmp = 1;
+	size_t l;
+	const char *si;
+
+	si = base;
+	for(i = 0; i < nitems; i++, si += size) {
+		cmp = cmpfn(si, search);
+		if(cmp >= 0)
+			break;
+	}
+	if(lret)
+		*lret = i;
+
+	if(cmp == 0)
+		ret = 1;
+
+	if(uret) {
+		if(cmp > 0)
+			*uret = i;
+		else {
+			for(; i < nitems; i++, si += size) {
+				cmp = cmpfn(si, search);
+				if(cmp > 0)
+					break;
+			}
+			*uret = i;
+		}
+	}
+	return ret;
+}
+
 static inline int binsearch_arg(
 		const void *base,
 		size_t nitems,

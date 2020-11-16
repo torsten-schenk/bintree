@@ -1136,7 +1136,7 @@ BINTREE_FN void BINTREE_ID(sum)(
 #ifdef BINTREE_USE_MULTI
 		BINTREE_MULTI multi,
 #endif
-		BINTREE_DATA *n,
+		const BINTREE_DATA *n,
 		BINTREE_SUM *pre,
 		BINTREE_SUM *post)
 {
