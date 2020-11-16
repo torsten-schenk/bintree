@@ -74,6 +74,7 @@ static inline int linsearch(
 	int ret = 0;
 	int cmp = 1;
 	size_t l;
+	size_t i;
 	const char *si;
 
 	si = base;
