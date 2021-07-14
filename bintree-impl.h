@@ -78,6 +78,9 @@ typedef int (*BINTREE_ID(cmp_t))(const BINTREE_DATA *a, const BINTREE_DATA *b);
 #define BINTREE_USE_BZERO
 #endif
 
+#ifndef BINTREE_BZERO
+#define BINTREE_BZERO(P, SZ) memset(P, 0, SZ);
+#endif
 
 #ifdef BINTREE_DEBUG
 BINTREE_FN void BINTREE_ID(dump) (
@@ -117,7 +120,7 @@ BINTREE_FN void BINTREE_ID(bzero) (
 		BINTREE_DATA *n
 )
 {
-	bzero(BINTREE_TONODE(n), sizeof(*BINTREE_TONODE(n)));
+	BINTREE_BZERO(BINTREE_TONODE(n), sizeof(*BINTREE_TONODE(n)));
 }
 
 BINTREE_FN int BINTREE_ID(memberof) (
@@ -476,7 +479,7 @@ BINTREE_FN void BINTREE_ID(insert)(
 {
 	BINTREE_DATA *cur;
 #ifdef BINTREE_USE_BZERO
-	bzero(BINTREE_TONODE(n), sizeof(*BINTREE_TONODE(n)));
+	BINTREE_BZERO(BINTREE_TONODE(n), sizeof(*BINTREE_TONODE(n)));
 #endif
 	if(!p) { /* append at end */
 		if(*root) {
@@ -666,7 +669,7 @@ BINTREE_FN void BINTREE_ID(remove)(
 		BINTREE_CUMUL(c) -= BINTREE_VALUE(x);
 #endif
 #ifdef BINTREE_USE_BZERO
-	bzero(BINTREE_TONODE(x), sizeof(*BINTREE_TONODE(x)));
+	BINTREE_BZERO(BINTREE_TONODE(x), sizeof(*BINTREE_TONODE(x)));
 #endif
 
 #ifdef BINTREE_USE_AVL
@@ -814,7 +817,7 @@ BINTREE_FN void BINTREE_ID(sort)(
 
 #ifndef BINTREE_USE_BZERO
 		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
-		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
+		BINTREE_BZERO(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
 #endif
 		BINTREE_CALL(insert, root, d, s);
 	}
@@ -846,7 +849,7 @@ BINTREE_FN int BINTREE_ID(sort_abortable)(
 		s = BINTREE_CALL(decon, &old);
 #ifndef BINTREE_USE_BZERO
 		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
-		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
+		BINTREE_BZERO(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
 #endif
 
 		/* perform upper search */
@@ -874,7 +877,7 @@ abort:
 		s = BINTREE_CALL(decon, &old);
 #ifndef BINTREE_USE_BZERO
 		/* otherwise, if BINTREE_USE_BZERO is defined, insert() will zero the node, so we don't have to do it here */
-		bzero(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
+		BINTREE_BZERO(BINTREE_TONODE(s), sizeof(*BINTREE_TONODE(s)));
 #endif
 		BINTREE_CALL(insert, root, NULL, s);
 	}
